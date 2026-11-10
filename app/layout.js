@@ -1,18 +1,29 @@
-import { Inter, Cormorant_Garamond } from "next/font/google";
+import { Inter, Archivo, Cormorant_Garamond } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
-// Headlines: Ivy Presto Display Light (licensed face, copied from the Eden House project)
+// Headings: Butler (Light for headlines, Medium available for emphasis)
 const display = localFont({
-  src: "./fonts/IvyPrestoDisplay-Light.otf",
+  src: [
+    { path: "./fonts/Butler_Light.otf", weight: "300", style: "normal" },
+    { path: "./fonts/Butler_Medium.otf", weight: "500", style: "normal" },
+  ],
   variable: "--font-display",
   display: "swap",
 });
 
-// Body, labels and figures
+// Paragraphs, labels and figures
 const sans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+// Calls to action: buttons and text links
+const cta = Archivo({
+  subsets: ["latin"],
+  weight: ["500"],
+  variable: "--font-cta",
   display: "swap",
 });
 
@@ -46,7 +57,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable} ${wordmark.variable}`}>
+    <html lang="en" className={`${display.variable} ${sans.variable} ${cta.variable} ${wordmark.variable}`}>
       <body>{children}</body>
     </html>
   );
