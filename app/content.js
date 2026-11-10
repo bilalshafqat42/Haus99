@@ -15,7 +15,9 @@ export const site = {
   phoneHref: "tel:800733463",
   email: "sales@refinedubai.com",
   address: "Dubai, United Arab Emirates",
-  brochureHref: "#", // TO CONFIRM: brochure PDF link
+  // TO CONFIRM: swap for the brochure PDF; until then it opens the register form
+  brochureHref: "#register",
+  privacyHref: "#", // TO CONFIRM: privacy policy page (required before the form goes live)
   mapsHref: "https://www.google.com/maps/search/?api=1&query=Jumeirah+Village+Triangle+Dubai", // TO CONFIRM: exact plot pin
 };
 

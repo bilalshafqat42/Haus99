@@ -16,9 +16,16 @@ function Arrow({ direction }) {
   );
 }
 
+const reducedMotion = () =>
+  typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 /*
  * A native scroll-snap track (swipe, trackpad and keyboard all work) with
  * a counter, arrows and an optional progress bar.
+ *
+ * All state is read from the track's real scroll position, so the arrows
+ * never get out of step with a swipe, and when every slide fits on screen
+ * the arrows and progress bar are hidden.
  *
  * controls: "top" puts the counter and arrows above the track (with `head`
  * on the left when given), "bottom" puts them below with `footnote`.
@@ -35,7 +42,7 @@ export default function Carousel({
   const trackRef = useRef(null);
   const slides = Children.toArray(children);
   const total = slides.length;
-  const [index, setIndex] = useState(0);
+  const [state, setState] = useState({ index: 0, atStart: true, atEnd: total <= 1, scrollable: total > 1 });
 
   const step = useCallback(() => {
     const track = trackRef.current;
@@ -49,27 +56,38 @@ export default function Carousel({
     const track = trackRef.current;
     if (!track) return;
     let frame = 0;
+    const measure = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      const scrollable = max > 4;
+      const atStart = track.scrollLeft <= 4;
+      const atEnd = track.scrollLeft >= max - 4;
+      const index = atEnd ? total - 1 : Math.min(total - 1, Math.round(track.scrollLeft / step()));
+      setState((prev) =>
+        prev.index === index && prev.atStart === atStart && prev.atEnd === atEnd && prev.scrollable === scrollable
+          ? prev
+          : { index, atStart, atEnd, scrollable },
+      );
+    };
     const update = () => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 4;
-        setIndex(atEnd ? total - 1 : Math.round(track.scrollLeft / step()));
-      });
+      frame = requestAnimationFrame(measure);
     };
+    measure();
     track.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
+    const observer = new ResizeObserver(update);
+    observer.observe(track);
     return () => {
       cancelAnimationFrame(frame);
       track.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
+      observer.disconnect();
     };
   }, [step, total]);
 
   const go = (dir) => {
-    const track = trackRef.current;
-    const target = Math.max(0, Math.min(total - 1, index + dir));
-    track?.scrollTo({ left: target * step(), behavior: "smooth" });
+    trackRef.current?.scrollBy({ left: dir * step(), behavior: reducedMotion() ? "auto" : "smooth" });
   };
+
+  const { index, atStart, atEnd, scrollable } = state;
 
   const counter = (
     <p className="carousel-count" aria-live="polite">
@@ -77,38 +95,38 @@ export default function Carousel({
     </p>
   );
 
-  const arrows = (
+  const arrows = scrollable ? (
     <div className="carousel-arrows">
-      <button type="button" onClick={() => go(-1)} disabled={index === 0} aria-label="Previous">
+      <button type="button" onClick={() => go(-1)} disabled={atStart} aria-label={`Previous ${label}`}>
         <Arrow direction="prev" />
       </button>
-      <button type="button" onClick={() => go(1)} disabled={index >= total - 1} aria-label="Next">
+      <button type="button" onClick={() => go(1)} disabled={atEnd} aria-label={`Next ${label}`}>
         <Arrow direction="next" />
       </button>
     </div>
-  );
+  ) : null;
 
   return (
     <div className={`carousel carousel-${controls} ${className}`}>
       {controls === "top" && (
         <div className="carousel-bar container">
-          {head ?? counter}
+          {head ?? (scrollable ? counter : <span />)}
           <div className="carousel-controls">
-            {head && counter}
+            {head && scrollable && counter}
             {arrows}
           </div>
         </div>
       )}
 
-      <ul ref={trackRef} className="carousel-track" aria-label={label} tabIndex={0}>
+      <ul ref={trackRef} className="carousel-track" aria-label={label} tabIndex={scrollable ? 0 : -1}>
         {slides.map((slide, i) => (
-          <li key={i} className="carousel-slide" aria-label={`${i + 1} of ${total}`}>
+          <li key={i} className="carousel-slide" aria-roledescription="slide" aria-label={`${i + 1} of ${total}`}>
             {slide}
           </li>
         ))}
       </ul>
 
-      {progress && (
+      {progress && scrollable && (
         <div className="carousel-progress container" aria-hidden="true">
           <span style={{ width: `${((index + 1) / total) * 100}%` }} />
         </div>
@@ -118,7 +136,7 @@ export default function Carousel({
         <div className="carousel-bar container">
           {footnote ? <p className="eyebrow eyebrow-muted">{footnote}</p> : <span />}
           <div className="carousel-controls">
-            {counter}
+            {scrollable && counter}
             {arrows}
           </div>
         </div>

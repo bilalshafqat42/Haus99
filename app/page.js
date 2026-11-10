@@ -41,7 +41,7 @@ export default function Home() {
   return (
     <>
       <Header />
-      <main id="top">
+      <main id="main" tabIndex={-1}>
         {/* Hero */}
         <section className="frame hero">
           <Image src={hero.image} alt="HAUS 99 exterior at dusk" fill preload sizes="100vw" className="hero-image" />

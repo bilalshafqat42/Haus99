@@ -34,7 +34,7 @@ export default function Header() {
   return (
     <header className={`header${scrolled ? " is-solid" : ""}${open ? " is-open" : ""}`}>
       <div className="header-inner">
-        <a href="#top" className="wordmark" aria-label="HAUS 99, back to top" onClick={close}>
+        <a href="#main" className="wordmark" aria-label="HAUS 99, back to top" onClick={close}>
           HAUS 99
         </a>
 

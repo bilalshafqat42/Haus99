@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { site } from "../content";
 
+const FALLBACK = `We could not send your details. Please call ${site.phoneLabel} or email ${site.email}.`;
+
 /*
  * Posts to /api/enquiry. Until that route is connected to the CRM it
  * answers 503, and the form tells the visitor to call or email instead,
@@ -19,61 +21,69 @@ export default function EnquiryForm() {
 
     setStatus("sending");
     setMessage("");
+    let serverMessage = "";
     try {
       const res = await fetch("/api/enquiry", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        signal: AbortSignal.timeout(15000),
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) {
+        serverMessage = typeof data.error === "string" ? data.error : "";
+        throw new Error("rejected");
+      }
       form.reset();
       setStatus("sent");
       setMessage("Thank you. A member of the sales team will call you shortly.");
-    } catch (err) {
+    } catch {
+      // Network failures, timeouts and server errors all end with the phone and email
       setStatus("error");
-      setMessage(
-        err.message ||
-          `We could not send your details. Please call ${site.phoneLabel} or email ${site.email}.`,
-      );
+      setMessage(serverMessage || FALLBACK);
     }
   }
 
   return (
-    <form className="enquiry-form" onSubmit={onSubmit} noValidate>
+    <form className="enquiry-form" onSubmit={onSubmit} noValidate aria-describedby="enquiry-consent">
       <label className="field">
         <span>Full name</span>
-        <input name="name" type="text" autoComplete="name" placeholder="Your name" required minLength={2} />
+        <input name="name" type="text" autoComplete="name" placeholder="Your name" required minLength={2} maxLength={120} />
       </label>
       <label className="field">
         <span>Email</span>
-        <input name="email" type="email" autoComplete="email" placeholder="name@email.com" required />
+        <input name="email" type="email" autoComplete="email" placeholder="name@email.com" required maxLength={200} />
       </label>
       <label className="field">
         <span>Mobile</span>
         <input
           name="mobile"
           type="tel"
+          inputMode="tel"
           autoComplete="tel"
           placeholder="+971"
           required
-          pattern="^\+?[0-9 ()-]{7,20}$"
+          pattern="\+?[0-9 \(\)\-]{7,20}"
+          title="A phone number, for example +971 50 123 4567"
         />
       </label>
-      {/* Honeypot: hidden from people, filled in by most bots */}
-      <input name="company" type="text" tabIndex={-1} autoComplete="off" className="hp" aria-hidden="true" />
+      {/* Spam trap: not rendered for people or autofill, filled in by most bots */}
+      <div hidden>
+        <label>
+          Leave this empty
+          <input name="h99_trap" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+        </label>
+      </div>
       <button type="submit" className="btn btn-light" disabled={status === "sending"}>
         {status === "sending" ? "Sending" : "Send"}
       </button>
 
-      <p className="form-consent">
-        By sending, you agree to be contacted about HAUS 99 and to our <a href="#">privacy policy</a>.
+      <p className="form-consent" id="enquiry-consent">
+        By sending, you agree to be contacted about HAUS 99 and to our <a href={site.privacyHref}>privacy policy</a>.
       </p>
-      {message && (
-        <p className={`form-status is-${status}`} role="status">
-          {message}
-        </p>
-      )}
+      <p className={`form-status is-${status}`} role="status" aria-live="polite">
+        {message}
+      </p>
     </form>
   );
 }
