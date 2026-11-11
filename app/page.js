@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import Carousel from "./components/Carousel";
 import EnquiryForm from "./components/EnquiryForm";
 import LocationMap from "./components/LocationMap";
+import { getSiteUrl } from "./site-url";
 import {
   site,
   hero,
@@ -20,6 +21,41 @@ import {
 } from "./content";
 
 const pad = (n) => String(n).padStart(2, "0");
+
+/*
+ * Structured data for search engines, using only facts already on the page.
+ * Prices are left out until Sales confirms the full price list.
+ */
+function StructuredData() {
+  const url = getSiteUrl();
+  const data = {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "WebSite", "@id": `${url}/#website`, url, name: site.name, inLanguage: "en" },
+      {
+        "@type": "ApartmentComplex",
+        "@id": `${url}/#residence`,
+        name: site.name,
+        url,
+        description: intro.text,
+        image: `${url}/images/og-share.jpg`,
+        numberOfAccommodationUnits: 99,
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Jumeirah Village Triangle",
+          addressRegion: "Dubai",
+          addressCountry: "AE",
+        },
+      },
+    ],
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data).replace(/</g, "\\u003c") }}
+    />
+  );
+}
 
 function Monogram({ className = "" }) {
   return <Image src="/brand/monogram.png" alt="" width={44} height={41} className={`monogram ${className}`} />;
@@ -40,6 +76,7 @@ function HausenLogo({ tone = "dark", width = 130 }) {
 export default function Home() {
   return (
     <>
+      <StructuredData />
       <Header />
       <main id="main" tabIndex={-1}>
         {/* Hero */}
