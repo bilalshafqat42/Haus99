@@ -26,8 +26,21 @@ function rateLimited(ip) {
   return recent.length > MAX_PER_WINDOW;
 }
 
+/*
+ * The visitor's address for the rate limit. Render sits behind Cloudflare,
+ * which sets CF-Connecting-IP itself (a visitor cannot fake it). The first
+ * X-Forwarded-For entry can be typed by the visitor, so it is not trusted;
+ * the last one, added by the proxy, is the fallback.
+ */
+function clientIp(headers) {
+  const cf = headers.get("cf-connecting-ip")?.trim();
+  if (cf) return cf;
+  const forwarded = headers.get("x-forwarded-for")?.split(",").map((part) => part.trim()).filter(Boolean);
+  return forwarded?.at(-1) || "unknown";
+}
+
 export async function POST(request) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+  const ip = clientIp(request.headers);
   if (rateLimited(ip)) {
     return Response.json({ error: `Too many attempts. ${FALLBACK}` }, { status: 429 });
   }
