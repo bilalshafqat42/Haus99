@@ -83,6 +83,96 @@ export default function Carousel({
     };
   }, [step, total]);
 
+  /*
+   * Mouse dragging. Touch and trackpads already scroll the track natively,
+   * so this only handles a mouse: snapping is paused while dragging, then the
+   * track settles on the nearest slide in the direction of the drag. A drag
+   * longer than a few pixels cancels the click that follows it.
+   */
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    let drag = null;
+    let suppressClick = false;
+    let restoreTimer = 0;
+
+    const restoreSnap = () => {
+      clearTimeout(restoreTimer);
+      track.style.scrollSnapType = "";
+    };
+
+    const onDown = (e) => {
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
+      if (track.scrollWidth - track.clientWidth <= 4) return;
+      restoreSnap();
+      drag = { id: e.pointerId, x: e.clientX, left: track.scrollLeft, moved: false };
+    };
+
+    const onMove = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const dx = e.clientX - drag.x;
+      if (!drag.moved) {
+        if (Math.abs(dx) < 5) return;
+        drag.moved = true;
+        track.setPointerCapture(e.pointerId);
+        track.style.scrollSnapType = "none";
+        track.classList.add("is-dragging");
+      }
+      track.scrollLeft = drag.left - dx;
+    };
+
+    const onUp = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const { moved, left } = drag;
+      drag = null;
+      if (!moved) return;
+      suppressClick = true;
+      setTimeout(() => (suppressClick = false), 0);
+      track.classList.remove("is-dragging");
+      if (track.hasPointerCapture(e.pointerId)) track.releasePointerCapture(e.pointerId);
+
+      const size = step();
+      const max = track.scrollWidth - track.clientWidth;
+      const position = track.scrollLeft / size;
+      const moveRight = track.scrollLeft > left;
+      // Settle forward or back depending on the drag direction, unless the drag barely moved
+      const delta = Math.abs(track.scrollLeft - left);
+      const index = moveRight ? Math.ceil(position) : Math.floor(position);
+      // A short drag goes back to where it started
+      const target = delta < size * 0.15 ? left : Math.max(0, Math.min(max, index * size));
+      track.scrollTo({ left: target, behavior: reducedMotion() ? "auto" : "smooth" });
+      // Turn snapping back on once the settle animation has finished
+      const done = () => restoreSnap();
+      track.addEventListener("scrollend", done, { once: true });
+      restoreTimer = setTimeout(done, 700);
+    };
+
+    const onClick = (e) => {
+      if (!suppressClick) return;
+      suppressClick = false;
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    // Images and links would otherwise start the browser's own drag-and-drop
+    const onDragStart = (e) => e.preventDefault();
+
+    track.addEventListener("pointerdown", onDown);
+    track.addEventListener("pointermove", onMove);
+    track.addEventListener("pointerup", onUp);
+    track.addEventListener("pointercancel", onUp);
+    track.addEventListener("click", onClick, true);
+    track.addEventListener("dragstart", onDragStart);
+    return () => {
+      clearTimeout(restoreTimer);
+      track.removeEventListener("pointerdown", onDown);
+      track.removeEventListener("pointermove", onMove);
+      track.removeEventListener("pointerup", onUp);
+      track.removeEventListener("pointercancel", onUp);
+      track.removeEventListener("click", onClick, true);
+      track.removeEventListener("dragstart", onDragStart);
+    };
+  }, [step]);
+
   const go = (dir) => {
     trackRef.current?.scrollBy({ left: dir * step(), behavior: reducedMotion() ? "auto" : "smooth" });
   };
@@ -118,7 +208,7 @@ export default function Carousel({
         </div>
       )}
 
-      <ul ref={trackRef} className="carousel-track" aria-label={label} tabIndex={scrollable ? 0 : -1}>
+      <ul ref={trackRef} className={`carousel-track${scrollable ? " is-draggable" : ""}`} aria-label={label} tabIndex={scrollable ? 0 : -1}>
         {slides.map((slide, i) => (
           <li key={i} className="carousel-slide" aria-roledescription="slide" aria-label={`${i + 1} of ${total}`}>
             {slide}

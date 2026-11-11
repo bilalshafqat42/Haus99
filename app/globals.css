@@ -370,6 +370,11 @@ main:focus { outline: none; }
 }
 .carousel-track::-webkit-scrollbar { display: none; }
 .carousel-slide { scroll-snap-align: start; }
+@media (pointer: fine) {
+  .carousel-track.is-draggable { cursor: grab; }
+}
+.carousel-track.is-dragging { cursor: grabbing; user-select: none; }
+.carousel-track.is-dragging * { pointer-events: none; }
 
 .carousel-bar {
   display: flex;
