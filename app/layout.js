@@ -1,6 +1,7 @@
 import { Inter, Archivo, Cormorant_Garamond } from "next/font/google";
 import localFont from "next/font/local";
 import { getSiteUrl } from "./site-url";
+import { isStagingSite } from "./staging";
 import "./globals.css";
 
 // Headings: Butler (Light for headlines, Medium available for emphasis)
@@ -70,6 +71,7 @@ export const metadata = {
     description: "99 private residences in Jumeirah Village Triangle, Dubai. Handover Q4 2028.",
     images: [shareImage.url],
   },
+  ...(isStagingSite() ? { robots: { index: false, follow: false } } : {}),
 };
 
 /** @type {import("next").Viewport} */
