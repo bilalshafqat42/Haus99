@@ -2,7 +2,7 @@ import Image from "next/image";
 import Header from "./components/Header";
 import Carousel from "./components/Carousel";
 import EnquiryForm from "./components/EnquiryForm";
-import LocationMap from "./components/LocationMap";
+import LocationExplorer from "./components/LocationExplorer";
 import { getSiteUrl } from "./site-url";
 import { getSiteContent } from "./panel/content-api";
 
@@ -256,29 +256,7 @@ export default async function Home() {
         </section>
 
         {/* Location */}
-        <section className="frame location" id="location">
-          <LocationMap />
-          <div className="location-card">
-            <p className="eyebrow">{location.eyebrow}</p>
-            <h2 className="display h3">{location.title}</h2>
-            <p className="location-text">{location.text}</p>
-            <ul className="distances">
-              {location.distances.map((d) => (
-                <li key={d.place}>
-                  <span>{d.place}</span>
-                  <span>{d.time}</span>
-                </li>
-              ))}
-            </ul>
-            <a href={site.mapsHref} target="_blank" rel="noopener noreferrer" className="btn btn-dark btn-block">
-              Open in Google Maps
-            </a>
-          </div>
-          <p className="map-note">
-            {process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ? "" : "Map is illustrative and not to scale. "}
-            Drive times are approximate.
-          </p>
-        </section>
+        <LocationExplorer />
 
         {/* Developers */}
         <section className="frame paper developers">

@@ -73,7 +73,7 @@ main:focus { outline: none; }
 
 /* Paragraph copy: Inter 18pt Light */
 .body, .lede, .hero-text, .register-text, .location-text, .footer-blurb,
-.amenity p, .carousel-footnote, .distances li span:first-child {
+.amenity p, .carousel-footnote, .distance-place {
   font-family: var(--body);
   font-weight: 300;
 }
@@ -516,13 +516,17 @@ main:focus { outline: none; }
 .location .mapboxgl-map { font-family: var(--sans); }
 
 /* Map pins: a square brand pin with the place's name beside it */
-.map-marker { display: flex; align-items: center; }
+.map-marker { display: flex; align-items: center; cursor: pointer; }
 .map-marker__pin {
   display: grid; place-items: center; flex: none;
   width: 24px; height: 24px;
   background: var(--ink);
 }
-.map-marker--place .map-marker__pin::after { content: ""; width: 6px; height: 6px; background: var(--gold); }
+.map-marker--place .map-marker__pin { color: var(--gold); transition: background-color 0.2s, color 0.2s; }
+.map-marker--place:hover .map-marker__pin,
+.map-marker.is-active .map-marker__pin { background: var(--gold); color: var(--ink); }
+.map-marker.is-active .map-marker__label { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.map-marker.is-active { z-index: 3; }
 .map-marker__label {
   padding: 5px 9px; background: var(--white); color: var(--ink);
   border: 1px solid var(--line); border-left: 0;
@@ -552,15 +556,24 @@ main:focus { outline: none; }
 }
 .location-text { margin: 22px 0 28px; font-size: 14px; line-height: 1.6; color: var(--text); }
 .distances { border-top: 1px solid var(--line-warm); margin-bottom: 40px; }
-.distances li {
-  display: flex; justify-content: space-between;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--line-warm);
-  font-size: 16px; font-weight: 300; color: var(--text);
+.distances li { border-bottom: 1px solid var(--line-warm); }
+.distance-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  width: 100%; padding: 14px 0;
+  font-size: 16px; font-weight: 300; color: var(--text); text-align: left;
 }
-.distances li span:last-child { font-size: 14px; font-weight: 400; color: var(--ink); }
+.distance-place { display: flex; align-items: center; gap: 12px; }
+.distance-time { font-size: 14px; font-weight: 400; color: var(--ink); white-space: nowrap; }
+.distance-icon { display: grid; place-items: center; flex: none; width: 24px; height: 24px; background: var(--ink); color: var(--gold); transition: background-color 0.2s, color 0.2s; }
+button.distance-row { cursor: pointer; transition: color 0.2s; }
+button.distance-row:hover, button.distance-row[aria-pressed="true"] { color: var(--ink); }
+button.distance-row:hover .distance-time,
+button.distance-row[aria-pressed="true"] .distance-time { color: var(--brown); }
+button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold); color: var(--ink); }
 .location .btn-dark { min-height: 52px; font-size: 13px; }
 .map-note { position: absolute; right: 16px; bottom: 10px; font-size: 12px; color: var(--muted); }
+/* Clear of the Mapbox attribution button in the bottom-right corner */
+.location:has(.map-live) .map-note { right: 52px; bottom: 14px; }
 
 @media (max-width: 767px) {
   .location { flex-direction: column; min-height: 0; padding-top: 320px; padding-bottom: 40px; margin-inline: 0; }
