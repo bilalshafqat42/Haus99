@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { nav } from "../content";
+
+// Matches the breakpoint in globals.css where the links fold into the menu
+const MENU_QUERY = "(max-width: 1023px)";
 
 /*
  * Transparent over the hero, then a solid bar once the page scrolls.
- * Below 960px the links fold into a menu button.
+ * Below 1024px the links fold into a menu button.
  */
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -18,14 +22,32 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /*
+   * While the menu is open: lock the page scroll, keep keyboard focus inside
+   * the menu (the page behind is made inert), close on Escape, and close if
+   * the window grows past the menu breakpoint (for example a tablet turned
+   * to landscape), which would otherwise leave the page unable to scroll.
+   */
   useEffect(() => {
     if (!open) return;
-    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    const behind = document.querySelectorAll("body > :not(header):not(script)");
+    const toggle = toggleRef.current;
+    const media = window.matchMedia(MENU_QUERY);
+    const onKey = (e) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      toggle?.focus();
+    };
+    const onMedia = () => !media.matches && setOpen(false);
     document.addEventListener("keydown", onKey);
+    media.addEventListener("change", onMedia);
     document.body.style.overflow = "hidden";
+    behind.forEach((el) => (el.inert = true));
     return () => {
       document.removeEventListener("keydown", onKey);
+      media.removeEventListener("change", onMedia);
       document.body.style.overflow = "";
+      behind.forEach((el) => (el.inert = false));
     };
   }, [open]);
 
@@ -50,6 +72,7 @@ export default function Header() {
         </nav>
 
         <button
+          ref={toggleRef}
           type="button"
           className="menu-toggle"
           aria-expanded={open}

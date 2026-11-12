@@ -63,6 +63,7 @@ export default function EnquiryForm() {
           autoComplete="tel"
           placeholder="+971"
           required
+          maxLength={20}
           pattern="\+?[0-9 \(\)\-]{7,20}"
           title="A phone number, for example +971 50 123 4567"
         />
