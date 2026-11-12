@@ -143,7 +143,7 @@ export default async function Home() {
           <Carousel label="Project renders" className="carousel-wide" footnote={project.footnote}>
             {project.slides.filter((s) => s.image).map((s, i) => (
               <figure key={`${i}-${s.caption}`} className="render">
-                <Image src={s.image} alt={s.caption} fill sizes="(max-width: 960px) 90vw, 80vw" />
+                <Image src={s.image} alt={s.caption} fill sizes="(max-width: 767px) 86vw, min(82vw, 1141px)" />
                 <figcaption>
                   <span>{pad(i + 1)}</span>
                   {s.caption}

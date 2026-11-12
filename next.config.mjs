@@ -54,6 +54,13 @@ function siteUrlIsStaging() {
 const nextConfig = {
   images: {
     remotePatterns: imageHosts.map((hostname) => ({ protocol: "https", hostname })),
+    // AVIF first (about 20% smaller than WebP for photos), WebP for browsers
+    // without it. Safe behind Cloudflare: it passes /_next/image through
+    // uncached, so each browser's Accept header reaches the server.
+    formats: ["image/avif", "image/webp"],
+    // Next's defaults plus 1440, 2560 and 2880: a full-width image on a 1440px
+    // retina laptop picks 2880 instead of jumping to 3840 (about 40% fewer pixels).
+    deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1920, 2048, 2560, 2880, 3840],
   },
   poweredByHeader: false,
   // Security headers for every response.
