@@ -448,7 +448,7 @@ main:focus { outline: none; }
   background: linear-gradient(180deg, rgba(60, 42, 28, 0.35), rgba(60, 42, 28, 0.15) 40%, rgba(40, 30, 22, 0.55));
 }
 .residence-card:hover img { transform: scale(1.04); }
-.residence-card-top { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.24em; text-transform: uppercase; }
+.residence-card-top { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; }
 .residence-card h3 { color: var(--white); font-size: clamp(24px, 2.2vw, 30px); margin-top: 18px; }
 .residence-card-foot {
   margin-top: auto;
