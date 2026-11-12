@@ -8,6 +8,9 @@ import { getSiteContent } from "./panel/content-api";
 
 const pad = (n) => String(n).padStart(2, "0");
 
+// "#" or empty: a page that does not exist yet (set it in the panel to make it a link)
+const isRealLink = (href) => typeof href === "string" && href.trim() !== "" && href.trim() !== "#";
+
 /*
  * Structured data for search engines, using only facts already on the page.
  * Prices are left out until Sales confirms the full price list.
@@ -91,8 +94,8 @@ export default async function Home() {
             <h1 className="display hero-title">{hero.title}</h1>
             <p className="hero-text">{hero.text}</p>
             <ul className="hero-tags">
-              {hero.tags.map((t) => (
-                <li key={t}>{t}</li>
+              {hero.tags.map((t, i) => (
+                <li key={`${i}-${t}`}>{t}</li>
               ))}
             </ul>
             <div className="hero-actions">
@@ -112,8 +115,8 @@ export default async function Home() {
         {/* Key figures */}
         <section className="frame stats" aria-label="Key figures">
           <dl className="container container-wide stats-grid">
-            {stats.map((s) => (
-              <div key={s.label}>
+            {stats.map((s, i) => (
+              <div key={`${i}-${s.label}`}>
                 <dt>{s.label}</dt>
                 <dd>{s.value}</dd>
               </div>
@@ -138,8 +141,8 @@ export default async function Home() {
             <p className="body">{project.text}</p>
           </div>
           <Carousel label="Project renders" className="carousel-wide" footnote={project.footnote}>
-            {project.slides.map((s, i) => (
-              <figure key={s.caption} className="render">
+            {project.slides.filter((s) => s.image).map((s, i) => (
+              <figure key={`${i}-${s.caption}`} className="render">
                 <Image src={s.image} alt={s.caption} fill sizes="(max-width: 960px) 90vw, 80vw" />
                 <figcaption>
                   <span>{pad(i + 1)}</span>
@@ -158,8 +161,8 @@ export default async function Home() {
               <h2 className="display h2">{collection.title}</h2>
             </div>
             <div className="body-stack">
-              {collection.paragraphs.map((p) => (
-                <p key={p.slice(0, 20)} className="body">
+              {collection.paragraphs.map((p, i) => (
+                <p key={i} className="body">
                   {p}
                 </p>
               ))}
@@ -186,7 +189,7 @@ export default async function Home() {
             }
           >
             {residences.items.map((r, i) => (
-              <article key={r.name} className="residence-card">
+              <article key={`${i}-${r.name}`} className="residence-card">
                 <Image src={r.image} alt="" fill sizes="(max-width: 640px) 80vw, 380px" />
                 <div className="residence-card-top">
                   <span>{pad(i + 1)}</span>
@@ -207,7 +210,7 @@ export default async function Home() {
           <div className="container container-wide split">
             <div>
               <p className="eyebrow eyebrow-rule">{paymentPlan.eyebrow}</p>
-              <p className="display payment-figure">{paymentPlan.title}</p>
+              <h2 className="display payment-figure">{paymentPlan.title}</h2>
               <p className="body payment-text">{paymentPlan.text}</p>
               <a href="#register" className="btn btn-green">
                 Speak to sales
@@ -215,7 +218,7 @@ export default async function Home() {
             </div>
             <ol className="payment-steps">
               {paymentPlan.steps.map((s, i) => (
-                <li key={s.label}>
+                <li key={`${i}-${s.label}`}>
                   <span className="payment-num">{pad(i + 1)}</span>
                   <span className="payment-label">{s.label}</span>
                   <span className="payment-value">{s.value}</span>
@@ -241,9 +244,9 @@ export default async function Home() {
             footnote={amenities.footnote}
           >
             {amenities.items.map((a, i) => (
-              <article key={a.title} className="amenity">
+              <article key={`${i}-${a.title}`} className="amenity">
                 <div className="amenity-image">
-                  <Image src={a.image} alt={a.title} fill sizes="(max-width: 640px) 80vw, 460px" />
+                  {a.image && <Image src={a.image} alt={a.title} fill sizes="(max-width: 640px) 80vw, 460px" />}
                 </div>
                 <h3 className="display">
                   <span>{pad(i + 1)}</span>
@@ -309,8 +312,8 @@ export default async function Home() {
             <nav aria-label="Explore">
               <p className="eyebrow">Explore</p>
               <ul>
-                {footer.explore.map((l) => (
-                  <li key={l.label}>
+                {footer.explore.map((l, i) => (
+                  <li key={`${i}-${l.label}`}>
                     <a href={l.href}>{l.label}</a>
                   </li>
                 ))}
@@ -331,9 +334,10 @@ export default async function Home() {
             <nav aria-label="Legal">
               <p className="eyebrow">Legal</p>
               <ul>
-                {footer.legal.map((l) => (
-                  <li key={l.label}>
-                    <a href={l.href}>{l.label}</a>
+                {footer.legal.map((l, i) => (
+                  <li key={`${i}-${l.label}`}>
+                    {/* A page not published yet shows as plain text, so it never jumps to the top */}
+                    {isRealLink(l.href) ? <a href={l.href}>{l.label}</a> : <span>{l.label}</span>}
                   </li>
                 ))}
               </ul>

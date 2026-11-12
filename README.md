@@ -33,6 +33,7 @@ Work goes to `stg` first. Once the manager approves it on staging, `stg` is merg
 | `IMAGE_HOSTS` | optional, defaults to `media.refinedubai.com` | same |
 | `ENQUIRY_WEBHOOK_URL` / `ENQUIRY_WEBHOOK_TOKEN` | not needed once connected to the panel | same |
 | `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` | for the location map | same |
+| `NEXT_PUBLIC_MAPBOX_STYLE_URL` | Mapbox Studio style, the same as Eden House The Park | same |
 
 Render sets `PORT` itself. Never commit secrets: `.env*` files are ignored by git, so set values in Render only.
 

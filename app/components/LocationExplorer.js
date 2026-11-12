@@ -14,12 +14,14 @@ const lngLat = (coords) => (Array.isArray(coords) && coords.length === 2 ? [coor
 
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const isPhone = () => window.matchMedia("(max-width: 767px)").matches;
+// Phones and tablets: the map sits above the card rather than behind it (globals.css).
+const isStacked = () => window.matchMedia("(max-width: 1023px)").matches;
 const NO_PADDING = { top: 0, right: 0, bottom: 0, left: 0 };
 const PROJECT_ID = "__project";
 
-// How far the card covers the map from the left (0 on phones, where the card is below it).
+// How far the card covers the map from the left (0 on phones and tablets, where the card is below it).
 function cardInset(section, container) {
-  if (isPhone() || !section || !container) return 0;
+  if (isStacked() || !section || !container) return 0;
   const card = section.querySelector(".location-card")?.getBoundingClientRect();
   return card ? Math.max(0, card.right - container.getBoundingClientRect().left) : 0;
 }
@@ -214,7 +216,7 @@ export default function LocationExplorer({ location, mapsHref }) {
       // The HAUS 99 callout stands about 100px above its plot, so the top
       // padding leaves room for it.
       // On phones the callout (about 230px wide, centred on the plot) needs room on both sides.
-      if (isPhone()) return { top: 84, bottom: 40, left: 125, right: 125 };
+      if (isStacked()) return { top: 84, bottom: 40, left: 125, right: 125 };
       return { top: 80, bottom: 70, left: cardInset(sectionRef.current, container) + 120, right: 200 };
     }
 
@@ -252,7 +254,7 @@ export default function LocationExplorer({ location, mapsHref }) {
       if (!map || !homeRef.current) return;
 
       // On phones the map is above the card: bring it into view.
-      if (isPhone()) containerRef.current?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "center" });
+      if (isStacked()) containerRef.current?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "center" });
 
       const duration = reducedMotion() ? 0 : 1200;
       const inset = cardInset(sectionRef.current, containerRef.current);
@@ -267,7 +269,10 @@ export default function LocationExplorer({ location, mapsHref }) {
         return;
       }
       if (PROJECT.coords) {
-        const padding = { top: 150, bottom: 60, left: inset + 120, right: 200 };
+        // Room above for the HAUS 99 callout; on phones and tablets it is centred, so equal sides.
+        const padding = isStacked()
+          ? { top: 150, bottom: 50, left: 125, right: 125 }
+          : { top: 150, bottom: 60, left: inset + 120, right: 200 };
         map.fitBounds([PROJECT.coords, place.coords], { padding, maxZoom: 14, duration });
       } else {
         // Centre the pin in the part of the map the card does not cover.

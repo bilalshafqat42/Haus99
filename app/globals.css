@@ -318,6 +318,13 @@ main:focus { outline: none; }
   .hero-developer img { width: 120px; }
 }
 
+/* Tablets: the logo leads above the heading, as on phones, instead of
+   sitting bottom-right where it would run into the buttons */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hero-content { display: flex; flex-direction: column; }
+  .hero-developer { position: static; order: -1; margin: 0 0 28px; }
+}
+
 /* ------------------------------------------------------------------ */
 /* Stats                                                              */
 /* ------------------------------------------------------------------ */
@@ -650,6 +657,14 @@ button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold
   .map-note { position: static; margin-top: 16px; padding-inline: var(--gutter); }
 }
 
+/* Tablets: the live map above the card too, so the card never hides the pins */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .location:has(.map-live) { flex-direction: column; min-height: 0; padding-top: 480px; padding-bottom: 48px; }
+  .location .map-live { height: 480px; }
+  .location:has(.map-live) .location-card { margin: 0 auto; }
+  .location:has(.map-live) .map-note { position: static; margin-top: 16px; }
+}
+
 /* ------------------------------------------------------------------ */
 /* Developers                                                         */
 /* ------------------------------------------------------------------ */
@@ -754,6 +769,13 @@ button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold
 /* Phone refinements                                                  */
 /* ------------------------------------------------------------------ */
 .carousel-count { white-space: nowrap; }
+/* A long footnote wraps rather than pushing the arrows off a narrow screen */
+.carousel-bar > :first-child { min-width: 0; }
+@media (max-width: 379px) {
+  .carousel-controls { gap: 12px; }
+  .carousel-arrows { gap: 0; }
+  .carousel-arrows button { width: 40px; }
+}
 
 @media (max-width: 767px) {
   .carousel-controls { gap: 20px; }
@@ -765,6 +787,8 @@ button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold
   .render figcaption { padding: 12px 16px; gap: 10px; font-size: 14px; }
 
   .carousel-top .carousel-bar { flex-direction: column; align-items: stretch; }
+  /* Amenities has no heading in its bar: counter left, arrows right, on one row */
+  .carousel-amenities .carousel-bar { flex-direction: row; align-items: center; }
   .residences .carousel-controls { flex-direction: row; justify-content: space-between; align-items: center; }
   .residences .carousel-bar { margin-bottom: 32px; }
   .carousel-cards .carousel-track { grid-auto-columns: 78%; gap: 14px; }

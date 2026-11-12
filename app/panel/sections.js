@@ -237,11 +237,34 @@ function sectionValues(slug, panel) {
   return out;
 }
 
+/*
+ * Images can only come from this site or the hosts next.config.mjs allows
+ * (IMAGE_HOSTS, default media.refinedubai.com). next/image refuses any other
+ * host with an error that would take the whole page down, so an image from
+ * elsewhere falls back to the default instead.
+ */
+const IMAGE_HOSTS = (process.env.IMAGE_HOSTS ?? "media.refinedubai.com")
+  .split(",")
+  .map((host) => host.trim().toLowerCase())
+  .filter(Boolean);
+
+function safeImage(value, fallback) {
+  const href = safeHref(value);
+  if (href === "" || href === "#") return fallback;
+  if (href.startsWith("/") && !href.startsWith("//")) return href;
+  try {
+    const url = new URL(href);
+    return url.protocol === "https:" && IMAGE_HOSTS.includes(url.hostname.toLowerCase()) ? href : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function cleanScalar(type, value, fallback) {
   if (value === undefined || value === null) return fallback;
   if (typeof value !== "string") return fallback;
   if (type === "LINK") return safeHref(value);
-  if (type === "IMAGE") return value.trim() === "" ? fallback : safeHref(value);
+  if (type === "IMAGE") return safeImage(value, fallback);
   return toPlainText(value);
 }
 

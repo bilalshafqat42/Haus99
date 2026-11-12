@@ -60,8 +60,8 @@ export default function Header({ nav }) {
         </a>
 
         <nav className="header-nav" id="site-nav" aria-label="Main">
-          {nav.map((item) => (
-            <a key={item.href} href={item.href} onClick={close}>
+          {nav.map((item, i) => (
+            <a key={`${i}-${item.href}`} href={item.href} onClick={close}>
               {item.label}
             </a>
           ))}

@@ -8,6 +8,14 @@ import { useState } from "react";
  * instead, so no enquiry is silently lost. `site` carries the phone, email
  * and privacy link, editable in the panel.
  */
+// Campaign tags (utm_source and so on) from the page address, passed on with
+// the enquiry so the panel's Leads page shows where the visitor came from.
+const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
+function utmTags() {
+  const params = new URLSearchParams(window.location.search);
+  return Object.fromEntries(UTM_KEYS.filter((key) => params.get(key)).map((key) => [key, params.get(key).slice(0, 200)]));
+}
+
 export default function EnquiryForm({ site }) {
   const FALLBACK = `We could not send your details. Please call ${site.phoneLabel} or email ${site.email}.`;
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
@@ -25,7 +33,7 @@ export default function EnquiryForm({ site }) {
       const res = await fetch("/api/enquiry", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        body: JSON.stringify({ ...Object.fromEntries(new FormData(form)), ...utmTags() }),
         signal: AbortSignal.timeout(15000),
       });
       const data = await res.json().catch(() => ({}));
@@ -79,7 +87,8 @@ export default function EnquiryForm({ site }) {
       </button>
 
       <p className="form-consent" id="enquiry-consent">
-        By sending, you agree to be contacted about HAUS 99 and to our <a href={site.privacyHref}>privacy policy</a>.
+        By sending, you agree to be contacted about HAUS 99 and to our{" "}
+        {site.privacyHref && site.privacyHref !== "#" ? <a href={site.privacyHref}>privacy policy</a> : "privacy policy"}.
       </p>
       <p className={`form-status is-${status}`} role="status" aria-live="polite">
         {message}
