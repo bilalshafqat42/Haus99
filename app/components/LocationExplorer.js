@@ -153,7 +153,7 @@ export default function LocationExplorer({ location, mapsHref }) {
         if (PROJECT.coords) {
           const el = markerElement(PROJECT.name, "project");
           markersRef.current.__project = el;
-          new mapboxgl.Marker({ element: el, anchor: "left", offset: [-15, 0] }).setLngLat(PROJECT.coords).addTo(map);
+          new mapboxgl.Marker({ element: el, anchor: "left", offset: [-22, 0] }).setLngLat(PROJECT.coords).addTo(map);
         }
         for (const place of PLACES) {
           if (!place.coords) continue;
@@ -172,8 +172,8 @@ export default function LocationExplorer({ location, mapsHref }) {
     // the space to its right. On phones the card is below the map; labels
     // sit to the right of their pins, so leave room on that side.
     function framePadding() {
-      if (isPhone()) return { top: 84, bottom: 36, left: 24, right: 120 };
-      return { top: 80, bottom: 80, left: cardInset(sectionRef.current, container) + 60, right: 200 };
+      if (isPhone()) return { top: 84, bottom: 56, left: 32, right: 120 };
+      return { top: 80, bottom: 130, left: cardInset(sectionRef.current, container) + 80, right: 200 };
     }
 
     const observer = new IntersectionObserver(
