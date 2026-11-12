@@ -781,6 +781,16 @@ button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold
 
 /* Phones: footer links tall enough to tap (24px minimum) */
 @media (max-width: 767px) {
+  /* Partner logos in two columns: each label with its logo underneath */
+  .footer-partners {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    grid-auto-flow: column;
+    align-items: center;
+    justify-items: start;
+    gap: 14px 24px;
+  }
   .footer ul { gap: 10px; }
   .footer ul a { display: inline-block; padding-block: 4px; }
 }
