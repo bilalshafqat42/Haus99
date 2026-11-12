@@ -6,8 +6,8 @@ Landing page for HAUS 99, 99 private residences in Jumeirah Village Triangle, Du
 
 | Branch | Website | Render service |
 |---|---|---|
-| `stg` | Staging: https://stg-house99.refinedubai.com | `stg-house99` |
-| `main` | Live (after manager approval) | `house99` (not created yet) |
+| `stg` | Staging: https://stg-haus99.refinedubai.com | `stg-house99` (Render address stg-house99.onrender.com) |
+| `main` | Live (after manager approval): https://haus99.refinedubai.com | `haus99` (not created yet) |
 
 Work goes to `stg` first. Once the manager approves it on staging, `stg` is merged into `main` through a pull request.
 
@@ -26,7 +26,7 @@ Work goes to `stg` first. Once the manager approves it on staging, `stg` is merg
 | Key | Staging | Live |
 |---|---|---|
 | `NODE_VERSION` | `22` | `22` |
-| `SITE_URL` | `https://stg-house99.refinedubai.com` | the live address |
+| `SITE_URL` | `https://stg-haus99.refinedubai.com` | `https://haus99.refinedubai.com` |
 | `ENQUIRY_WEBHOOK_URL` | not set yet | not set yet |
 | `ENQUIRY_WEBHOOK_TOKEN` | optional | optional |
 
