@@ -29,11 +29,14 @@ Work goes to `stg` first. Once the manager approves it on staging, `stg` is merg
 | `SITE_URL` | `https://stg-haus99.refinedubai.com` | `https://haus99.refinedubai.com` |
 | `ENQUIRY_WEBHOOK_URL` | not set yet | not set yet |
 | `ENQUIRY_WEBHOOK_TOKEN` | optional | optional |
+| `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` | Mapbox public token (`pk.`) | same |
+| `NEXT_PUBLIC_MAPBOX_STYLE_URL` | Mapbox Studio style, the same as Eden House The Park | same |
 
 Render sets `PORT` itself.
 
 - **SITE_URL** is used for canonical links, share images, robots.txt and the sitemap.
 - **Enquiry form:** until `ENQUIRY_WEBHOOK_URL` is set, the form tells visitors to call 800 REFINE or email sales instead of sending their details.
+- **Location map:** the two `NEXT_PUBLIC_MAPBOX_*` values are built into the page, so a change needs a redeploy. Without a token the drawn, illustrative map shows instead. In Mapbox, the token's URL restrictions must include haus99.refinedubai.com, stg-haus99.refinedubai.com and both onrender.com addresses, or the map stays blank. Pin coordinates live in `app/content.js`.
 - **Secrets:** never commit secrets. `.env*` files are ignored by git, so set values in Render only.
 
 ## Staging is never indexed

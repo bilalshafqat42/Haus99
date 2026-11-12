@@ -124,13 +124,17 @@ export const location = {
   eyebrow: "The location",
   title: "The city within reach",
   text: "Jumeirah Village Triangle, minutes from Al Khail Road and Sheikh Mohammed Bin Zayed Road.",
+  // Map pins are [latitude, longitude], as copied from Google Maps.
+  // TO CONFIRM: the HAUS 99 plot coordinate. Until it is set, the map has no
+  // project pin and opens framed on the destinations below.
+  project: { name: "HAUS 99", coords: null },
   distances: [
-    { place: "Al Khail Road", time: "2 min" },
-    { place: "Skylight Mall", time: "5 min" },
-    { place: "Dubai Marina", time: "15 min" },
-    { place: "Palm Jumeirah", time: "15 min" },
-    { place: "Mall of the Emirates", time: "18 min" },
-    { place: "Burj Khalifa", time: "22 min" },
+    { place: "Al Khail Road", time: "2 min", coords: [25.137604606658417, 55.26032228688701] },
+    { place: "Skylight Mall", time: "5 min", coords: [25.05220475077663, 55.19403134270324] },
+    { place: "Dubai Marina", time: "15 min", coords: [25.076575281854, 55.141980754341] },
+    { place: "Palm Jumeirah", time: "15 min", coords: [25.113030737131165, 55.140837986652095] },
+    { place: "Mall of the Emirates", time: "18 min", coords: [25.118310977062507, 55.201187353829226] },
+    { place: "Burj Khalifa", time: "22 min", coords: [25.197468800417575, 55.27490210964941] },
   ],
 };
 

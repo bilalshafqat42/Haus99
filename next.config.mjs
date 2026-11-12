@@ -2,18 +2,23 @@ const isDev = process.env.NODE_ENV !== "production";
 
 /*
  * Content-Security-Policy, matched to what the page really loads: its own
- * scripts, styles, fonts and images only (the fonts are self-hosted by
- * next/font, and nothing is loaded from another site). 'unsafe-inline' for
- * scripts and styles because Next's hydration needs it without a
- * per-request nonce, and a nonce would end static rendering.
+ * scripts, styles, fonts and images (the fonts are self-hosted by
+ * next/font), plus Mapbox for the location map: styles, tiles, sprites and
+ * glyphs from api.mapbox.com, telemetry to events.mapbox.com, and tile
+ * workers from blob: URLs (the same allowances as the Eden House site).
+ * 'unsafe-inline' for scripts and styles because Next's hydration and
+ * mapbox-gl need it without a per-request nonce, and a nonce would end
+ * static rendering.
  */
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https://api.mapbox.com",
   "font-src 'self' data:",
-  `connect-src 'self'${isDev ? " ws:" : ""}`,
+  `connect-src 'self' https://api.mapbox.com https://events.mapbox.com${isDev ? " ws:" : ""}`,
+  "worker-src 'self' blob:",
+  "child-src 'self' blob:",
   "frame-src 'none'",
   "object-src 'none'",
   "base-uri 'self'",

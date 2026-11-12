@@ -511,6 +511,32 @@ main:focus { outline: none; }
   background: var(--map-land);
 }
 .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* The Mapbox map (LocationMap.js). Beats mapbox-gl.css, which sets .mapboxgl-map to position: relative. */
+.location .map-live { position: absolute; inset: 0; }
+.location .mapboxgl-map { font-family: var(--sans); }
+
+/* Map pins: a square brand pin with the place's name beside it */
+.map-marker { display: flex; align-items: center; }
+.map-marker__pin {
+  display: grid; place-items: center; flex: none;
+  width: 24px; height: 24px;
+  background: var(--ink);
+}
+.map-marker--place .map-marker__pin::after { content: ""; width: 6px; height: 6px; background: var(--gold); }
+.map-marker__label {
+  padding: 5px 9px; background: var(--white); color: var(--ink);
+  border: 1px solid var(--line); border-left: 0;
+  font: 500 10px/1.2 var(--sans); letter-spacing: 0.12em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.map-marker--project { z-index: 2; }
+.map-marker--project .map-marker__pin { width: 30px; height: 30px; background: var(--white); border: 1.5px solid var(--gold); }
+.map-marker--project .map-marker__pin img { width: 18px; height: auto; }
+.map-marker--project .map-marker__label { background: var(--ink); color: var(--white); border-color: var(--ink); letter-spacing: 0.2em; }
+.map-marker.is-label-hidden .map-marker__label,
+.map-marker.is-folded { visibility: hidden; }
+.map-marker.is-label-hidden:hover { z-index: 3; }
+.map-marker.is-label-hidden:hover .map-marker__label { visibility: visible; }
 .map-label { font: 400 11px var(--sans); fill: #6f6a62; }
 .map-label-strong { font-size: 12px; fill: var(--ink); font-weight: 500; }
 .map-street { font: 500 10px var(--sans); letter-spacing: 0.2em; fill: #8b877f; }
@@ -539,6 +565,9 @@ main:focus { outline: none; }
 @media (max-width: 767px) {
   .location { flex-direction: column; min-height: 0; padding-top: 320px; padding-bottom: 40px; margin-inline: 0; }
   .map-svg { height: 420px; }
+  /* The live map sits fully above the card, so no pin or the Mapbox logo hides behind it */
+  .location:has(.map-live) { padding-top: 400px; }
+  .location .map-live { height: 400px; }
   .location-card { margin: 0 auto; padding: 36px 24px; }
   .map-note { position: static; margin-top: 16px; padding-inline: var(--gutter); }
 }

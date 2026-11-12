@@ -270,7 +270,10 @@ export default function Home() {
               Open in Google Maps
             </a>
           </div>
-          <p className="map-note">Map is illustrative and not to scale. Drive times are approximate.</p>
+          <p className="map-note">
+            {process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN ? "" : "Map is illustrative and not to scale. "}
+            Drive times are approximate.
+          </p>
         </section>
 
         {/* Developers */}
