@@ -139,6 +139,10 @@ export const location = {
 };
 
 export const developers = {
+  // Logo files in public/brand; replaceable in the panel (The developers).
+  hausenLogo: "/brand/hausen-dark.png",
+  hausenLogoLight: "/brand/hausen-white.png",
+  refineLogo: "/brand/refine-dark.svg",
   eyebrow: "The developers",
   title: "Vision, and the discipline to deliver it",
   refine:

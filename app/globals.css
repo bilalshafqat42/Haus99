@@ -763,6 +763,7 @@ button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold
 .footer-blurb { margin-top: 36px; max-width: 290px; font-size: 14px; line-height: 1.6; color: var(--text); }
 .footer ul { display: grid; gap: 18px; font-size: 14px; color: var(--ink); }
 .footer ul a:hover { color: var(--brown); }
+.footer-partners img { height: auto; }
 .footer-partners {
   display: flex; flex-wrap: wrap; align-items: center; gap: 24px 56px;
   margin-top: 72px; padding-bottom: 60px;

@@ -50,16 +50,15 @@ function Monogram({ className = "" }) {
   return <Image src="/brand/monogram.png" alt="" width={44} height={41} className={`monogram ${className}`} />;
 }
 
-function RefineLogo({ tone = "dark", width = 200 }) {
-  return (
-    <Image src={`/brand/refine-${tone}.svg`} alt="Refine, Shaping Tomorrow" width={width} height={Math.round(width * 0.324)} />
-  );
+// The logos come from the panel (The developers), defaulting to the files in
+// public/brand. width/height only reserve space; CSS keeps height auto, so a
+// replacement logo with different proportions is never stretched.
+function RefineLogo({ src, width = 200 }) {
+  return <Image src={src} alt="Refine, Shaping Tomorrow" width={width} height={Math.round(width * 0.324)} />;
 }
 
-function HausenLogo({ tone = "dark", width = 130 }) {
-  return (
-    <Image src={`/brand/hausen-${tone}.png`} alt="Hausen Developments" width={width} height={Math.round(width * 0.594)} />
-  );
+function HausenLogo({ src, width = 130 }) {
+  return <Image src={src} alt="Hausen Developments" width={width} height={Math.round(width * 0.594)} />;
 }
 
 export default async function Home() {
@@ -107,7 +106,7 @@ export default async function Home() {
               </a>
             </div>
             <div className="hero-developer">
-              <HausenLogo tone="white" width={156} />
+              <HausenLogo src={developers.hausenLogoLight} width={156} />
             </div>
           </div>
         </section>
@@ -272,14 +271,14 @@ export default async function Home() {
               <div>
                 <p className="eyebrow">Powered by</p>
                 <div className="developer-logo">
-                  <RefineLogo width={200} />
+                  <RefineLogo src={developers.refineLogo} width={200} />
                 </div>
                 <p className="body">{developers.refine}</p>
               </div>
               <div>
                 <p className="eyebrow">Developed by</p>
                 <div className="developer-logo">
-                  <HausenLogo width={130} />
+                  <HausenLogo src={developers.hausenLogo} width={130} />
                 </div>
                 <p className="body">{developers.hausen}</p>
               </div>
@@ -346,9 +345,9 @@ export default async function Home() {
 
           <div className="footer-partners">
             <span>Developed by</span>
-            <HausenLogo width={74} />
+            <HausenLogo src={developers.hausenLogo} width={74} />
             <span>Powered by</span>
-            <RefineLogo width={122} />
+            <RefineLogo src={developers.refineLogo} width={122} />
           </div>
 
           <div className="footer-bottom">

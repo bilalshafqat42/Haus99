@@ -174,6 +174,15 @@ export const SECTIONS = [
       text("title", "Heading", developers.title),
       long("refine", "About Refine", developers.refine),
       long("hausen", "About Hausen", developers.hausen),
+      image("hausenLogo", "Hausen logo (dark, on light backgrounds)", developers.hausenLogo, {
+        helperText: "Shown in this section and the footer. A transparent PNG or SVG, at least 400px wide.",
+      }),
+      image("hausenLogoLight", "Hausen logo (white, on the hero photo)", developers.hausenLogoLight, {
+        helperText: "Shown at the bottom right of the hero. A white transparent PNG or SVG, at least 400px wide.",
+      }),
+      image("refineLogo", "Refine logo (dark, on light backgrounds)", developers.refineLogo, {
+        helperText: "Shown in this section and the footer. A transparent PNG or SVG, at least 400px wide.",
+      }),
     ],
   },
   {
