@@ -1,16 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { site } from "../content";
-
-const FALLBACK = `We could not send your details. Please call ${site.phoneLabel} or email ${site.email}.`;
 
 /*
- * Posts to /api/enquiry. Until that route is connected to the CRM it
- * answers 503, and the form tells the visitor to call or email instead,
- * so no enquiry is silently lost.
+ * Posts to /api/enquiry, which sends the enquiry to the Refine Admin panel's
+ * Leads page. If that fails, the form tells the visitor to call or email
+ * instead, so no enquiry is silently lost. `site` carries the phone, email
+ * and privacy link, editable in the panel.
  */
-export default function EnquiryForm() {
+export default function EnquiryForm({ site }) {
+  const FALLBACK = `We could not send your details. Please call ${site.phoneLabel} or email ${site.email}.`;
   const [status, setStatus] = useState("idle"); // idle | sending | sent | error
   const [message, setMessage] = useState("");
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { nav } from "../content";
 
 // Matches the breakpoint in globals.css where the links fold into the menu
 const MENU_QUERY = "(max-width: 1023px)";
@@ -10,7 +9,7 @@ const MENU_QUERY = "(max-width: 1023px)";
  * Transparent over the hero, then a solid bar once the page scrolls.
  * Below 1024px the links fold into a menu button.
  */
-export default function Header() {
+export default function Header({ nav }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const toggleRef = useRef(null);

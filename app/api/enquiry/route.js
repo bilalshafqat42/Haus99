@@ -1,9 +1,12 @@
 /*
  * Register-interest submissions.
  *
- * Set ENQUIRY_WEBHOOK_URL (and optionally ENQUIRY_WEBHOOK_TOKEN) to the CRM
- * or automation endpoint that should receive leads. Without it the route
- * answers 503 and stores nothing, and the form shows the phone and email.
+ * Sent to the Refine Admin panel's Leads page when CONTENT_API_URL and
+ * CONTENT_API_TOKEN are set (the panel then emails or forwards it as set in
+ * Website Settings). Otherwise to ENQUIRY_WEBHOOK_URL (and optionally
+ * ENQUIRY_WEBHOOK_TOKEN), a CRM or automation endpoint. With neither the
+ * route answers 503 and stores nothing, and the form shows the phone and
+ * email.
  *
  * The rate limit below is per server instance and in memory, so it only
  * slows casual abuse. Before launch, add bot protection at the edge
@@ -67,10 +70,65 @@ export async function POST(request) {
     return Response.json({ error: "Please check your name, email and mobile number." }, { status: 422 });
   }
 
-  const webhook = process.env.ENQUIRY_WEBHOOK_URL;
-  if (!webhook) {
+  // UTM tags from the page address, when the form passes them on.
+  const utm = {};
+  for (const key of ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"]) {
+    if (typeof body[key] === "string" && body[key].trim()) utm[key] = body[key].trim().slice(0, 200);
+  }
+
+  const sent = await sendToPanel({ name, email, mobile, utm, ip }) ?? (await sendToWebhook({ name, email, mobile }));
+  if (sent === null) {
     return Response.json({ error: `Online enquiries are not open yet. ${FALLBACK}` }, { status: 503 });
   }
+  if (!sent) {
+    return Response.json({ error: `We could not send your details. ${FALLBACK}` }, { status: 502 });
+  }
+  return Response.json({ ok: true });
+}
+
+/*
+ * To the Refine Admin panel's Leads page (POST /api/v1/leads), with the
+ * same site key the site reads its content with. The panel stores the
+ * enquiry and then routes it (email, CRM webhook) as set in Website
+ * Settings. Returns null when the panel is not configured, so the webhook
+ * below can be used instead; true or false otherwise.
+ */
+async function sendToPanel({ name, email, mobile, utm, ip }) {
+  const baseUrl = process.env.CONTENT_API_URL?.trim();
+  const token = process.env.CONTENT_API_TOKEN?.trim();
+  if (!baseUrl || !token) return null;
+
+  const [firstName, ...rest] = name.split(/\s+/);
+  const res = await fetch(`${baseUrl.replace(/\/+$/, "")}/api/v1/leads`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+      // The visitor's address, for the panel's per-visitor limit.
+      ...(ip !== "unknown" ? { "X-Client-IP": ip } : {}),
+    },
+    body: JSON.stringify({
+      source: "register-interest",
+      formSource: "haus99-website",
+      firstName,
+      lastName: rest.join(" "),
+      email,
+      phone: mobile,
+      // The form states that sending is agreeing to be contacted.
+      consent: true,
+      ...utm,
+    }),
+    signal: AbortSignal.timeout(8000),
+  }).catch(() => null);
+
+  if (!res?.ok) console.error("Panel lead submission failed:", res?.status ?? "no response");
+  return Boolean(res?.ok);
+}
+
+// The older route: a CRM or automation webhook, if one is set instead.
+async function sendToWebhook({ name, email, mobile }) {
+  const webhook = process.env.ENQUIRY_WEBHOOK_URL;
+  if (!webhook) return null;
 
   const res = await fetch(webhook, {
     method: "POST",
@@ -81,9 +139,6 @@ export async function POST(request) {
     body: JSON.stringify({ project: "HAUS 99", name, email, mobile, submittedAt: new Date().toISOString() }),
     signal: AbortSignal.timeout(8000),
   }).catch(() => null);
-
-  if (!res?.ok) {
-    return Response.json({ error: `We could not send your details. ${FALLBACK}` }, { status: 502 });
-  }
-  return Response.json({ ok: true });
+  return Boolean(res?.ok);
 }
+

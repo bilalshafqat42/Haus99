@@ -1,6 +1,15 @@
 const isDev = process.env.NODE_ENV !== "production";
 
 /*
+ * Where images edited in the Refine Admin panel are served from (its media
+ * host), comma-separated bare hostnames. Read at build time.
+ */
+const imageHosts = (process.env.IMAGE_HOSTS ?? "media.refinedubai.com")
+  .split(",")
+  .map((host) => host.trim().toLowerCase())
+  .filter(Boolean);
+
+/*
  * Content-Security-Policy, matched to what the page really loads: its own
  * scripts, styles, fonts and images (the fonts are self-hosted by
  * next/font), plus Mapbox for the location map: styles, tiles, sprites and
@@ -14,7 +23,7 @@ const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://api.mapbox.com",
+  `img-src 'self' data: blob: https://api.mapbox.com${imageHosts.map((host) => ` https://${host}`).join("")}`,
   "font-src 'self' data:",
   `connect-src 'self' https://api.mapbox.com https://events.mapbox.com${isDev ? " ws:" : ""}`,
   "worker-src 'self' blob:",
@@ -43,6 +52,9 @@ function siteUrlIsStaging() {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {
+    remotePatterns: imageHosts.map((hostname) => ({ protocol: "https", hostname })),
+  },
   poweredByHeader: false,
   // Security headers for every response.
   headers() {

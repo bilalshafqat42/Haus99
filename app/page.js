@@ -4,21 +4,7 @@ import Carousel from "./components/Carousel";
 import EnquiryForm from "./components/EnquiryForm";
 import LocationMap from "./components/LocationMap";
 import { getSiteUrl } from "./site-url";
-import {
-  site,
-  hero,
-  stats,
-  intro,
-  project,
-  collection,
-  residences,
-  paymentPlan,
-  amenities,
-  location,
-  developers,
-  enquiry,
-  footer,
-} from "./content";
+import { getSiteContent } from "./panel/content-api";
 
 const pad = (n) => String(n).padStart(2, "0");
 
@@ -26,7 +12,7 @@ const pad = (n) => String(n).padStart(2, "0");
  * Structured data for search engines, using only facts already on the page.
  * Prices are left out until Sales confirms the full price list.
  */
-function StructuredData() {
+function StructuredData({ site, intro }) {
   const url = getSiteUrl();
   const data = {
     "@context": "https://schema.org",
@@ -73,11 +59,29 @@ function HausenLogo({ tone = "dark", width = 130 }) {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  // The copy in app/content.js, with any edits from the Refine Admin panel.
+  const {
+    site,
+    nav,
+    hero,
+    stats,
+    intro,
+    project,
+    collection,
+    residences,
+    paymentPlan,
+    amenities,
+    location,
+    developers,
+    enquiry,
+    footer,
+  } = await getSiteContent();
+
   return (
     <>
-      <StructuredData />
-      <Header />
+      <StructuredData site={site} intro={intro} />
+      <Header nav={nav} />
       <main id="main" tabIndex={-1}>
         {/* Hero */}
         <section className="frame hero">
@@ -308,7 +312,7 @@ export default function Home() {
             <p className="eyebrow eyebrow-light">{enquiry.eyebrow}</p>
             <h2 className="display h2">{enquiry.title}</h2>
             <p className="register-text">{enquiry.text}</p>
-            <EnquiryForm />
+            <EnquiryForm site={site} />
             <p className="register-contact">
               <a href={site.phoneHref}>{site.phoneLabel}</a>
               <a href={`mailto:${site.email}`}>{site.email}</a>
