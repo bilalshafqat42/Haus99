@@ -15,6 +15,7 @@ const lngLat = (coords) => (Array.isArray(coords) && coords.length === 2 ? [coor
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const isPhone = () => window.matchMedia("(max-width: 767px)").matches;
 const NO_PADDING = { top: 0, right: 0, bottom: 0, left: 0 };
+const PROJECT_ID = "__project";
 
 // How far the card covers the map from the left (0 on phones, where the card is below it).
 function cardInset(section, container) {
@@ -37,8 +38,7 @@ const ICON_SVG = (name) =>
 
 /*
  * A square brand pin with an icon, and the place's name beside it. Names
- * are set with textContent, never as HTML. The project pin carries the
- * monogram.
+ * are set with textContent, never as HTML.
  */
 function markerElement(name, kind, icon) {
   const el = document.createElement("div");
@@ -46,18 +46,51 @@ function markerElement(name, kind, icon) {
   el.setAttribute("aria-hidden", "true");
   const pin = document.createElement("span");
   pin.className = "map-marker__pin";
-  if (kind === "project") {
-    const img = document.createElement("img");
-    img.src = "/brand/monogram.png";
-    img.alt = "";
-    pin.append(img);
-  } else {
-    pin.innerHTML = ICON_SVG(icon);
-  }
+  pin.innerHTML = ICON_SVG(icon);
   const label = document.createElement("span");
   label.className = "map-marker__label";
   label.textContent = name;
   el.append(pin, label);
+  return el;
+}
+
+/*
+ * The HAUS 99 callout, the map's focal point: a dark card with the
+ * monogram, the name and the neighbourhood, and a pointer down to a gold
+ * dot with a pulsing halo on the exact plot. Anchored at the dot. The card
+ * counts as the "pin" for the overlap check, so other places give way to it.
+ */
+function projectElement(name, area) {
+  const el = document.createElement("div");
+  el.className = "map-marker map-marker--project";
+  el.setAttribute("aria-hidden", "true");
+  el.title = `${name}: click to zoom in`;
+  const card = document.createElement("span");
+  card.className = "map-marker__pin project-callout";
+  const badge = document.createElement("span");
+  badge.className = "project-callout__badge";
+  const img = document.createElement("img");
+  img.src = "/brand/monogram.png";
+  img.alt = "";
+  badge.append(img);
+  const text = document.createElement("span");
+  text.className = "project-callout__text";
+  const title = document.createElement("span");
+  title.className = "project-callout__name";
+  title.textContent = name;
+  const sub = document.createElement("span");
+  sub.className = "project-callout__area";
+  sub.textContent = area;
+  text.append(title, sub);
+  card.append(badge, text);
+  const stem = document.createElement("span");
+  stem.className = "project-callout__stem";
+  const dot = document.createElement("span");
+  dot.className = "project-callout__dot";
+  // No separate label: the card carries the name.
+  const label = document.createElement("span");
+  label.className = "map-marker__label";
+  el.append(card, stem, dot, label);
   return el;
 }
 
@@ -76,7 +109,11 @@ export default function LocationExplorer({ location, mapsHref }) {
   // `location` is the panel-edited copy (app/panel/sections.js); pins keep
   // their coordinates and icons from app/content.js.
   const [{ PROJECT, PLACES }] = useState(() => ({
-    PROJECT: { name: location.project?.name || "HAUS 99", coords: lngLat(location.project?.coords) },
+    PROJECT: {
+      name: location.project?.name || "HAUS 99",
+      area: location.project?.area || "Jumeirah Village Triangle",
+      coords: lngLat(location.project?.coords),
+    },
     PLACES: location.distances.map((d) => ({ ...d, coords: lngLat(d.coords) })),
   }));
   const sectionRef = useRef(null);
@@ -96,8 +133,8 @@ export default function LocationExplorer({ location, mapsHref }) {
     let cancelled = false;
 
     /*
-     * Places close together would draw over each other. Taking the
-     * selected place first, then the project, then list order: a marker
+     * Places close together would draw over each other. Taking the HAUS 99
+     * callout first (it never hides), then the selected place, then list order: a marker
      * whose pin lands on one already placed folds away; one whose label
      * would overlap keeps its pin and hides its name. Both come back on
      * hover, when selected, or once zoomed in far enough to fit.
@@ -106,7 +143,7 @@ export default function LocationExplorer({ location, mapsHref }) {
       const overlaps = (a, b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
       const all = Object.values(markersRef.current);
       for (const el of all) el.classList.remove("is-label-hidden", "is-folded");
-      const rank = (el) => (el.classList.contains("is-active") ? 0 : el.classList.contains("map-marker--project") ? 1 : 2);
+      const rank = (el) => (el.classList.contains("map-marker--project") ? 0 : el.classList.contains("is-active") ? 1 : 2);
       const ordered = [...all].sort((a, b) => rank(a) - rank(b));
       const taken = [];
       for (const el of ordered) {
@@ -151,9 +188,11 @@ export default function LocationExplorer({ location, mapsHref }) {
         applyRoadStyle(map);
         homeRef.current = { center: map.getCenter(), zoom: map.getZoom() };
         if (PROJECT.coords) {
-          const el = markerElement(PROJECT.name, "project");
-          markersRef.current.__project = el;
-          new mapboxgl.Marker({ element: el, anchor: "left", offset: [-22, 0] }).setLngLat(PROJECT.coords).addTo(map);
+          const el = projectElement(PROJECT.name, PROJECT.area);
+          el.addEventListener("click", () => selectRef.current?.(PROJECT_ID));
+          markersRef.current[PROJECT_ID] = el;
+          // Anchored at the centre of the dot, which sits at the bottom of the callout.
+          new mapboxgl.Marker({ element: el, anchor: "bottom", offset: [0, 9] }).setLngLat(PROJECT.coords).addTo(map);
         }
         for (const place of PLACES) {
           if (!place.coords) continue;
@@ -172,8 +211,11 @@ export default function LocationExplorer({ location, mapsHref }) {
     // the space to its right. On phones the card is below the map; labels
     // sit to the right of their pins, so leave room on that side.
     function framePadding() {
-      if (isPhone()) return { top: 84, bottom: 56, left: 32, right: 120 };
-      return { top: 80, bottom: 130, left: cardInset(sectionRef.current, container) + 80, right: 200 };
+      // The HAUS 99 callout stands about 100px above its plot, so the top
+      // padding leaves room for it.
+      // On phones the callout (about 230px wide, centred on the plot) needs room on both sides.
+      if (isPhone()) return { top: 84, bottom: 40, left: 125, right: 125 };
+      return { top: 80, bottom: 70, left: cardInset(sectionRef.current, container) + 120, right: 200 };
     }
 
     const observer = new IntersectionObserver(
@@ -214,13 +256,18 @@ export default function LocationExplorer({ location, mapsHref }) {
 
       const duration = reducedMotion() ? 0 : 1200;
       const inset = cardInset(sectionRef.current, containerRef.current);
+      if (next === PROJECT_ID && PROJECT.coords) {
+        // Zoom in on the plot, with the callout clear of the card.
+        map.flyTo({ center: PROJECT.coords, zoom: 15, padding: { ...NO_PADDING, left: inset, top: 100 }, duration, essential: false });
+        return;
+      }
       const place = PLACES.find((p) => p.place === next);
       if (!place?.coords) {
         map.easeTo({ ...homeRef.current, padding: NO_PADDING, duration: reducedMotion() ? 0 : 900 });
         return;
       }
       if (PROJECT.coords) {
-        const padding = { top: 90, bottom: 90, left: inset + 90, right: 200 };
+        const padding = { top: 150, bottom: 60, left: inset + 120, right: 200 };
         map.fitBounds([PROJECT.coords, place.coords], { padding, maxZoom: 14, duration });
       } else {
         // Centre the pin in the part of the map the card does not cover.
