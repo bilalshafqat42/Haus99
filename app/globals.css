@@ -310,6 +310,8 @@ main:focus { outline: none; }
   .hero { margin-top: 0; margin-inline: 0; }
   .hero-content { padding-bottom: 48px; }
   .hero-actions .btn { flex: 1 1 100%; min-width: 0; }
+  /* Phones: the hero fills the screen, so the key figures start below it */
+  .hero { min-height: 100vh; min-height: 100svh; }
   /* Phones: the Hausen logo leads, above the heading */
   .hero-content { display: flex; flex-direction: column; }
   .hero-developer { position: static; order: -1; margin: 0 0 28px; }
@@ -341,12 +343,11 @@ main:focus { outline: none; }
   .stats-grid > div:last-child { grid-column: 1 / -1; }
 }
 
-/* Phones only: thin lines between the figures, and more room around each */
+/* Phones only: more room around each figure */
 @media (max-width: 767px) {
   .stats-grid { row-gap: 0; padding-block: 8px; }
-  .stats-grid > div { gap: 8px; padding: 24px 0; border-top: 1px solid rgba(255, 255, 255, 0.22); }
-  .stats-grid > div:nth-child(-n + 2) { border-top: 0; }
-  .stats-grid > div:nth-child(odd):not(:last-child) { padding-right: 20px; border-right: 1px solid rgba(255, 255, 255, 0.22); }
+  .stats-grid > div { gap: 8px; padding: 24px 0; }
+  .stats-grid > div:nth-child(odd):not(:last-child) { padding-right: 20px; }
   .stats-grid > div:nth-child(even) { padding-left: 20px; }
 }
 
