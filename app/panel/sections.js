@@ -259,9 +259,11 @@ function cleanValue(field, value) {
     });
 }
 
-// Coordinates for the map pins stay in code; a place keeps its pin while its
-// name matches one of the defaults.
-const coordsFor = (place) => location.distances.find((d) => d.place === place)?.coords ?? null;
+// Coordinates and icons for the map pins stay in code; a place keeps its pin
+// and icon while its name matches one of the defaults.
+const defaultPlace = (place) => location.distances.find((d) => d.place === place);
+const coordsFor = (place) => defaultPlace(place)?.coords ?? null;
+const iconFor = (place) => defaultPlace(place)?.icon ?? null;
 
 /*
  * The whole page's content, in exactly the shape app/content.js exports, with
@@ -290,7 +292,7 @@ export function buildSiteContent(panel = {}) {
     location: {
       ...location,
       ...v.location,
-      distances: v.location.distances.map((d) => ({ ...d, coords: coordsFor(d.place) })),
+      distances: v.location.distances.map((d) => ({ ...d, coords: coordsFor(d.place), icon: iconFor(d.place) })),
     },
     developers: { ...developers, ...v.developers },
     enquiry: { ...enquiry, ...v.enquiry },

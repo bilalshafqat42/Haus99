@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 import IllustrativeMap from "./IllustrativeMap";
 import { applyRoadStyle } from "./map-road-style";
-import { location, site } from "../content";
 
 const TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 const STYLE_URL = process.env.NEXT_PUBLIC_MAPBOX_STYLE_URL || "mapbox://styles/mapbox/light-v11";
@@ -12,8 +11,6 @@ const STYLE_URL = process.env.NEXT_PUBLIC_MAPBOX_STYLE_URL || "mapbox://styles/m
 // content.js keeps Google Maps order [lat, lng]; Mapbox wants [lng, lat].
 const lngLat = (coords) => (Array.isArray(coords) && coords.length === 2 ? [coords[1], coords[0]] : null);
 
-const PROJECT = { name: location.project?.name || "HAUS 99", coords: lngLat(location.project?.coords) };
-const PLACES = location.distances.map((d) => ({ ...d, coords: lngLat(d.coords) }));
 
 const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const isPhone = () => window.matchMedia("(max-width: 767px)").matches;
@@ -75,7 +72,13 @@ function markerElement(name, kind, icon) {
  * the viewport. Without an access token the drawn, illustrative map shows
  * and the destinations are a plain list.
  */
-export default function LocationExplorer() {
+export default function LocationExplorer({ location, mapsHref }) {
+  // `location` is the panel-edited copy (app/panel/sections.js); pins keep
+  // their coordinates and icons from app/content.js.
+  const [{ PROJECT, PLACES }] = useState(() => ({
+    PROJECT: { name: location.project?.name || "HAUS 99", coords: lngLat(location.project?.coords) },
+    PLACES: location.distances.map((d) => ({ ...d, coords: lngLat(d.coords) })),
+  }));
   const sectionRef = useRef(null);
   const containerRef = useRef(null);
   const mapRef = useRef(null);
@@ -191,7 +194,7 @@ export default function LocationExplorer() {
       mapRef.current = null;
       markersRef.current = {};
     };
-  }, []);
+  }, [PLACES, PROJECT]);
 
   // Highlight the selected pin, and re-check which labels fit.
   useEffect(() => {
@@ -224,7 +227,7 @@ export default function LocationExplorer() {
         map.flyTo({ center: place.coords, zoom: 13.5, padding: { ...NO_PADDING, left: inset }, duration, essential: false });
       }
     },
-    [active],
+    [active, PLACES, PROJECT],
   );
 
   useEffect(() => {
@@ -275,7 +278,7 @@ export default function LocationExplorer() {
             </li>
           ))}
         </ul>
-        <a href={site.mapsHref} target="_blank" rel="noopener noreferrer" className="btn btn-dark btn-block">
+        <a href={mapsHref} target="_blank" rel="noopener noreferrer" className="btn btn-dark btn-block">
           Open in Google Maps
         </a>
       </div>

@@ -256,7 +256,7 @@ export default async function Home() {
         </section>
 
         {/* Location */}
-        <LocationExplorer />
+        <LocationExplorer location={location} mapsHref={site.mapsHref} />
 
         {/* Developers */}
         <section className="frame paper developers">
