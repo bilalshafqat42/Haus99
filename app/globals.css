@@ -27,6 +27,9 @@
   --map-pin-halo: rgba(199, 150, 91, 0.16);
 
   --frame: clamp(8px, 1.67vw, 24px);
+  /* One content width for every section, so all left and right edges line
+     up with the header logo and its Register button */
+  --content: 1152px;
   --gutter: clamp(20px, 5vw, 40px);
   --section-y: clamp(72px, 9vw, 128px);
   --header-h: 96px;
@@ -93,11 +96,13 @@ main:focus { outline: none; }
 
 .container {
   width: 100%;
-  max-width: calc(1072px + var(--gutter) * 2);
+  max-width: calc(var(--content) + var(--gutter) * 2);
   margin-inline: auto;
   padding-inline: var(--gutter);
 }
-.container-wide { max-width: calc(1192px + var(--gutter) * 2); }
+/* Sections without the outer frame get the same inset, so their content
+   lines up with framed sections at every screen width */
+.intro, .collection, .payment { padding-inline: var(--frame); }
 .container-text { max-width: calc(920px + var(--gutter) * 2); }
 
 .split {
@@ -207,7 +212,7 @@ main:focus { outline: none; }
   transition: background-color 0.3s, box-shadow 0.3s;
 }
 .header-inner {
-  max-width: calc(1152px + var(--gutter) * 2);
+  max-width: calc(var(--content) + var(--gutter) * 2);
   margin-inline: auto;
   padding: 0 var(--gutter);
   height: var(--header-h);
@@ -234,6 +239,7 @@ main:focus { outline: none; }
 
 @media (max-width: 1023px) {
   .header { inset: 0 0 auto; }
+  .header-inner { padding-inline: calc(var(--gutter) + var(--frame)); }
   /* backdrop-filter would make the fixed menu overlay size itself to the bar */
   .header.is-solid { backdrop-filter: none; background: rgba(31, 27, 24, 0.96); }
   .header-inner, .header.is-solid .header-inner { height: 68px; }
@@ -291,7 +297,7 @@ main:focus { outline: none; }
 }
 .hero-content {
   position: relative;
-  max-width: calc(1152px + var(--gutter) * 2);
+  max-width: calc(var(--content) + var(--gutter) * 2);
   padding-top: calc(var(--header-h) + 80px);
   padding-bottom: 84px;
 }
@@ -308,6 +314,7 @@ main:focus { outline: none; }
 
 @media (max-width: 767px) {
   .hero { margin-top: 0; margin-inline: 0; }
+  .hero-content { padding-inline: calc(var(--gutter) + var(--frame)); }
   .hero-content { padding-bottom: 48px; }
   .hero-actions .btn { flex: 1 1 100%; min-width: 0; }
   /* Phones: the hero fills the screen, so the key figures start below it */
@@ -340,11 +347,13 @@ main:focus { outline: none; }
   border-left: 1px solid rgba(255, 255, 255, 0.28);
 }
 .stats-grid > div:first-child { border-left: 0; padding-left: 0; }
+.stats-grid > div:last-child { padding-right: 0; }
 .stats-grid dd { font-size: clamp(20px, 1.8vw, 26px); font-weight: 300; line-height: 1.2; white-space: nowrap; }
 .stats-grid dt { font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.82; }
 
 @media (max-width: 1023px) {
   .stats { margin-inline: 0; }
+  .stats-grid { padding-inline: calc(var(--gutter) + var(--frame)); }
   .stats-grid { grid-template-columns: repeat(2, 1fr); row-gap: 28px; }
   .stats-grid > div { padding-inline: 0 16px; border-left: 0; }
   .stats-grid > div:last-child { grid-column: 1 / -1; }
@@ -448,7 +457,7 @@ main:focus { outline: none; }
 .residences .carousel-controls { flex-direction: column; align-items: flex-end; gap: 16px; }
 .carousel-cards .carousel-track,
 .carousel-amenities .carousel-track {
-  --track-start: max(var(--gutter), calc((100vw - 2 * var(--frame) - 1072px) / 2));
+  --track-start: max(var(--gutter), calc((100% - var(--content)) / 2));
 }
 .carousel-cards .carousel-track { grid-auto-columns: clamp(260px, 30vw, 378px); gap: 26px; }
 
@@ -621,7 +630,7 @@ main:focus { outline: none; }
 .location-card {
   position: relative;
   width: min(460px, calc(100% - 2 * var(--gutter)));
-  margin-left: max(var(--gutter), calc((100% - 1192px) / 2));
+  margin-left: max(var(--gutter), calc((100% - var(--content)) / 2));
   padding: 48px 44px 44px;
   background: var(--white);
   box-shadow: 0 30px 60px -20px rgba(31, 27, 24, 0.22);

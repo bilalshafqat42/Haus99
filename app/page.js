@@ -114,7 +114,7 @@ export default async function Home() {
 
         {/* Key figures */}
         <section className="frame stats" aria-label="Key figures">
-          <dl className="container container-wide stats-grid">
+          <dl className="container stats-grid">
             {stats.map((s, i) => (
               <div key={`${i}-${s.label}`}>
                 <dt>{s.label}</dt>
@@ -207,7 +207,7 @@ export default async function Home() {
 
         {/* Payment plan */}
         <section className="payment" id="payment-plan">
-          <div className="container container-wide split">
+          <div className="container split">
             <div>
               <p className="eyebrow eyebrow-rule">{paymentPlan.eyebrow}</p>
               <h2 className="display payment-figure">{paymentPlan.title}</h2>
