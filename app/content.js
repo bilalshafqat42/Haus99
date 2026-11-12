@@ -18,7 +18,7 @@ export const site = {
   // TO CONFIRM: swap for the brochure PDF; until then it opens the register form
   brochureHref: "#register",
   privacyHref: "#", // TO CONFIRM: privacy policy page (required before the form goes live)
-  mapsHref: "https://www.google.com/maps/search/?api=1&query=Jumeirah+Village+Triangle+Dubai", // TO CONFIRM: exact plot pin
+  mapsHref: "https://www.google.com/maps/search/?api=1&query=25.03889100969974%2C55.180593172505176", // the HAUS 99 plot
 };
 
 export const nav = [
@@ -126,11 +126,10 @@ export const location = {
   text: "Jumeirah Village Triangle, minutes from Al Khail Road and Sheikh Mohammed Bin Zayed Road.",
   // Map pins are [latitude, longitude], as copied from Google Maps. Icons:
   // road, shopping, marina, palm, landmark (drawn in LocationExplorer.js).
-  // TO CONFIRM: the HAUS 99 plot coordinate. Until it is set, the map has no
-  // project pin and opens framed on the destinations below.
-  project: { name: "HAUS 99", coords: null },
+  // The HAUS 99 plot. With coords set to null the map has no project pin.
+  project: { name: "HAUS 99", coords: [25.03889100969974, 55.180593172505176] },
   distances: [
-    { place: "Al Khail Road", time: "2 min", icon: "road", coords: [25.137604606658417, 55.26032228688701] },
+    { place: "Al Khail Road", time: "2 min", icon: "road", coords: [25.048692, 55.196031] }, // nearest point on the road to the plot
     { place: "Skylight Mall", time: "5 min", icon: "shopping", coords: [25.05220475077663, 55.19403134270324] },
     { place: "Dubai Marina", time: "15 min", icon: "marina", coords: [25.076575281854, 55.141980754341] },
     { place: "Palm Jumeirah", time: "15 min", icon: "palm", coords: [25.113030737131165, 55.140837986652095] },
