@@ -48,6 +48,14 @@ export async function POST(request) {
     return Response.json({ error: `Too many attempts. ${FALLBACK}` }, { status: 429 });
   }
 
+  // JSON only (13 November 2026 audit). A plain form or text/plain post
+  // needs no CORS preflight, so any other website could make its visitors'
+  // browsers submit enquiries here; the form itself always sends JSON.
+  const contentType = request.headers.get("content-type")?.split(";")[0].trim().toLowerCase();
+  if (contentType !== "application/json") {
+    return Response.json({ error: "Invalid request." }, { status: 415 });
+  }
+
   let body;
   try {
     body = await request.json();
