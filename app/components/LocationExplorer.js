@@ -127,6 +127,9 @@ export default function LocationExplorer({ location, mapsHref }) {
   const selectRef = useRef(null);
   const [active, setActive] = useState(null);
   const [mapReady, setMapReady] = useState(false);
+  // Mapbox could not start (token refused or URL-restricted, no WebGL, script
+  // blocked): show the drawn map and plain list instead of an empty box.
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -162,8 +165,21 @@ export default function LocationExplorer({ location, mapsHref }) {
     };
     layoutRef.current = layoutLabels;
 
+    const fail = () => {
+      if (cancelled || homeRef.current) return;
+      cancelled = true;
+      mapRef.current?.remove();
+      mapRef.current = null;
+      setFailed(true);
+    };
+
     const init = async () => {
-      const { default: mapboxgl } = await import("mapbox-gl");
+      let mapboxgl;
+      try {
+        ({ default: mapboxgl } = await import("mapbox-gl"));
+      } catch {
+        return fail();
+      }
       if (cancelled) return;
 
       const options = {
@@ -182,8 +198,18 @@ export default function LocationExplorer({ location, mapsHref }) {
         options.fitBoundsOptions = { padding: framePadding(), maxZoom: isPhone() ? 11.5 : 12.5 };
       }
 
-      const map = new mapboxgl.Map(options);
+      let map;
+      try {
+        map = new mapboxgl.Map(options);
+      } catch {
+        return fail(); // no WebGL
+      }
       mapRef.current = map;
+      // An error before the map has loaded (style or token refused) means it
+      // never will; later errors (a single tile) are left to Mapbox.
+      map.on("error", fail);
+      const timer = setTimeout(fail, 20000);
+      map.once("load", () => clearTimeout(timer));
       map.addControl(new mapboxgl.AttributionControl({ compact: true }));
 
       map.on("load", () => {
@@ -286,7 +312,7 @@ export default function LocationExplorer({ location, mapsHref }) {
     selectRef.current = select;
   }, [select]);
 
-  const live = Boolean(TOKEN);
+  const live = Boolean(TOKEN) && !failed;
 
   return (
     <section className="frame location" id="location" ref={sectionRef}>
@@ -306,8 +332,8 @@ export default function LocationExplorer({ location, mapsHref }) {
         <h2 className="display h3">{location.title}</h2>
         <p className="location-text">{location.text}</p>
         <ul className="distances">
-          {PLACES.map((d) => (
-            <li key={d.place}>
+          {PLACES.map((d, i) => (
+            <li key={`${i}-${d.place}`}>
               {live && d.coords ? (
                 <button
                   type="button"

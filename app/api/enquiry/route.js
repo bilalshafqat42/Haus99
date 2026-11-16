@@ -18,15 +18,49 @@ const FALLBACK = "Please call 800 REFINE (733463) or email sales@refinedubai.com
 
 const WINDOW_MS = 10 * 60 * 1000;
 const MAX_PER_WINDOW = 5;
+const MAX_TRACKED = 5000;
+const MAX_BODY_BYTES = 8 * 1024; // the real form sends well under 1 KB
 const hits = new Map();
 
 function rateLimited(ip) {
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
   recent.push(now);
+  hits.delete(ip); // re-inserted last, so the Map stays in order of last use
   hits.set(ip, recent);
-  if (hits.size > 5000) hits.clear();
+  if (hits.size > MAX_TRACKED) {
+    // Drop the least recently seen addresses rather than everyone's history
+    for (const key of hits.keys()) {
+      if (hits.size <= MAX_TRACKED * 0.9) break;
+      hits.delete(key);
+    }
+  }
   return recent.length > MAX_PER_WINDOW;
+}
+
+// The body as JSON, refusing anything over MAX_BODY_BYTES before reading it all
+async function readJson(request) {
+  const declared = Number(request.headers.get("content-length"));
+  if (declared > MAX_BODY_BYTES) return { tooLarge: true };
+  const reader = request.body?.getReader();
+  if (!reader) return { body: null };
+  const chunks = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > MAX_BODY_BYTES) {
+      await reader.cancel().catch(() => {});
+      return { tooLarge: true };
+    }
+    chunks.push(value);
+  }
+  try {
+    return { body: JSON.parse(Buffer.concat(chunks).toString("utf8")) };
+  } catch {
+    return { body: null };
+  }
 }
 
 /*
@@ -44,9 +78,6 @@ function clientIp(headers) {
 
 export async function POST(request) {
   const ip = clientIp(request.headers);
-  if (rateLimited(ip)) {
-    return Response.json({ error: `Too many attempts. ${FALLBACK}` }, { status: 429 });
-  }
 
   // JSON only (13 November 2026 audit). A plain form or text/plain post
   // needs no CORS preflight, so any other website could make its visitors'
@@ -56,12 +87,8 @@ export async function POST(request) {
     return Response.json({ error: "Invalid request." }, { status: 415 });
   }
 
-  let body;
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ error: "Invalid request." }, { status: 400 });
-  }
+  const { body, tooLarge } = await readJson(request);
+  if (tooLarge) return Response.json({ error: "Invalid request." }, { status: 413 });
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
@@ -76,6 +103,12 @@ export async function POST(request) {
 
   if (name.length < 2 || !EMAIL.test(email) || !PHONE_CHARS.test(mobile) || digits < 7 || digits > 15) {
     return Response.json({ error: "Please check your name, email and mobile number." }, { status: 422 });
+  }
+
+  // Counted only once the details are valid, so a visitor fixing a typo is
+  // never locked out; invalid requests are refused above without any cost.
+  if (rateLimited(ip)) {
+    return Response.json({ error: `Too many attempts. ${FALLBACK}` }, { status: 429 });
   }
 
   // UTM tags from the page address, when the form passes them on.

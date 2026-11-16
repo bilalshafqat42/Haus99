@@ -53,12 +53,18 @@ function Monogram({ className = "" }) {
 // The logos come from the panel (The developers), defaulting to the files in
 // public/brand. width/height only reserve space; CSS keeps height auto, so a
 // replacement logo with different proportions is never stretched.
+// SVG logos skip the optimiser (it refuses SVG). Next spots a path ending in
+// .svg on its own, but not one with a query string such as logo.svg?v=2.
+const isSvg = (src) => /\.svg(?:[?#]|$)/i.test(src ?? "");
+
 function RefineLogo({ src, width = 200 }) {
-  return <Image src={src} alt="Refine, Shaping Tomorrow" width={width} height={Math.round(width * 0.324)} />;
+  return (
+    <Image src={src} alt="Refine, Shaping Tomorrow" width={width} height={Math.round(width * 0.324)} unoptimized={isSvg(src)} />
+  );
 }
 
 function HausenLogo({ src, width = 130 }) {
-  return <Image src={src} alt="Hausen Developments" width={width} height={Math.round(width * 0.594)} />;
+  return <Image src={src} alt="Hausen Developments" width={width} height={Math.round(width * 0.594)} unoptimized={isSvg(src)} />;
 }
 
 export default async function Home() {
@@ -142,7 +148,7 @@ export default async function Home() {
           <Carousel label="Project renders" className="carousel-wide" footnote={project.footnote}>
             {project.slides.filter((s) => s.image).map((s, i) => (
               <figure key={`${i}-${s.caption}`} className="render">
-                <Image src={s.image} alt={s.caption} fill sizes="(max-width: 767px) 86vw, min(82vw, 1141px)" />
+                <Image src={s.image} alt="" fill sizes="(max-width: 767px) 86vw, min(82vw, 1141px)" />
                 <figcaption>
                   <span>{pad(i + 1)}</span>
                   {s.caption}

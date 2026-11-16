@@ -40,8 +40,13 @@ async function fetchPanelSections() {
       if (response.ok) {
         const payload = await response.json();
         const sections = payload?.sections;
+        if (!sections || typeof sections !== "object" || Array.isArray(sections)) {
+          // A reply in the wrong shape is treated like an outage, so it never
+          // replaces the panel's edits with the app/content.js copy.
+          console.error("Panel content request failed: unexpected reply shape");
+          break;
+        }
         cacheLife({ stale: 60, revalidate: 300, expire: 86400 });
-        if (!sections || typeof sections !== "object" || Array.isArray(sections)) return {};
         await writeLastGood(sections);
         return sections;
       }

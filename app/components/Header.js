@@ -42,11 +42,15 @@ export default function Header({ nav }) {
     media.addEventListener("change", onMedia);
     document.body.style.overflow = "hidden";
     behind.forEach((el) => (el.inert = true));
+    // Move keyboard focus into the menu, which comes before this button in
+    // the page, so Tab walks the links rather than leaving the page.
+    const frame = requestAnimationFrame(() => document.querySelector("#site-nav a")?.focus());
     return () => {
       document.removeEventListener("keydown", onKey);
       media.removeEventListener("change", onMedia);
       document.body.style.overflow = "";
       behind.forEach((el) => (el.inert = false));
+      cancelAnimationFrame(frame);
     };
   }, [open]);
 

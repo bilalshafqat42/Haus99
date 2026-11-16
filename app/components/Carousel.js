@@ -210,7 +210,7 @@ export default function Carousel({
 
       <ul ref={trackRef} className={`carousel-track${scrollable ? " is-draggable" : ""}`} aria-label={label} tabIndex={scrollable ? 0 : -1}>
         {slides.map((slide, i) => (
-          <li key={i} className="carousel-slide" aria-roledescription="slide" aria-label={`${i + 1} of ${total}`}>
+          <li key={i} className="carousel-slide">
             {slide}
           </li>
         ))}

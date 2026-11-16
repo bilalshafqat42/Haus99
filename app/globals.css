@@ -278,7 +278,8 @@ main:focus { outline: none; }
     visibility: hidden;
     transition: opacity 0.25s, visibility 0.25s;
   }
-  .is-open .header-nav { opacity: 1; visibility: visible; }
+  /* Visible at once on open (the fade is the opacity), so focus can move into the menu */
+  .is-open .header-nav { opacity: 1; visibility: visible; transition: opacity 0.25s, visibility 0s; }
   .header-nav a:not(.btn) { font-size: 15px; }
 }
 
@@ -739,7 +740,10 @@ button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold
 .field input:user-invalid { border-bottom-color: #e6b8a2; }
 .enquiry-form .btn-light { padding-inline: 0; }
 .form-consent, .form-status { grid-column: 1 / -1; font-size: 12px; color: rgba(255, 255, 255, 0.8); }
-.form-status:empty { display: none; }
+/* Empty: out of the layout but still in the accessibility tree, so screen
+   readers announce the message when it arrives (a live region that appears
+   at the same moment as its text is often not read out). */
+.form-status:empty { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .form-consent { margin-top: -12px; }
 .form-consent a { text-decoration: underline; }
 .form-status { font-size: 15px; color: var(--white); }

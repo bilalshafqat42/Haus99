@@ -272,7 +272,9 @@ function safeImage(value, fallback) {
 function cleanScalar(type, value, fallback) {
   if (value === undefined || value === null) return fallback;
   if (typeof value !== "string") return fallback;
-  if (type === "LINK") return safeHref(value);
+  // A link an editor cleared keeps the default, so no button points at
+  // nothing (an empty href reloads the page). In a list the default is "".
+  if (type === "LINK") return safeHref(value) || fallback;
   if (type === "IMAGE") return safeImage(value, fallback);
   return toPlainText(value);
 }
@@ -288,8 +290,14 @@ function cleanValue(field, value) {
         cleaned[itemField.key] = cleanScalar(itemField.type, item[itemField.key], "");
       }
       return cleaned;
-    });
+    })
+    // A list item saved with every field empty is dropped, not drawn as a
+    // blank row
+    .filter((cleaned) => Object.values(cleaned).some((v) => v !== "" && v !== "#"));
 }
+
+// Links need both a label and somewhere to go
+const isLink = (item) => item.label && item.href && item.href !== "#";
 
 // Coordinates and icons for the map pins stay in code; a place keeps its pin
 // and icon while its name matches one of the defaults.
@@ -307,9 +315,9 @@ export function buildSiteContent(panel = {}) {
 
   return {
     site: { ...site, ...v.contact },
-    nav: v.navigation.items,
+    nav: v.navigation.items.filter(isLink),
     hero: { ...hero, ...v.hero, tags: v.hero.tags.map((t) => t.label).filter(Boolean) },
-    stats: v.stats.items,
+    stats: v.stats.items.filter((s) => s.value && s.label),
     intro: { ...intro, ...v.intro },
     project: { ...project, ...v.project },
     collection: { ...collection, ...v.collection, paragraphs: v.collection.paragraphs.map((p) => p.text).filter(Boolean) },
@@ -324,11 +332,11 @@ export function buildSiteContent(panel = {}) {
     location: {
       ...location,
       ...v.location,
-      distances: v.location.distances.map((d) => ({ ...d, coords: coordsFor(d.place), icon: iconFor(d.place) })),
+      distances: v.location.distances.filter((d) => d.place).map((d) => ({ ...d, coords: coordsFor(d.place), icon: iconFor(d.place) })),
     },
     developers: { ...developers, ...v.developers },
     enquiry: { ...enquiry, ...v.enquiry },
-    footer: { ...footer, ...v.footer },
+    footer: { ...footer, ...v.footer, explore: (v.footer.explore ?? footer.explore).filter(isLink) },
   };
 }
 
