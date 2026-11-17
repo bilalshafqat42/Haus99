@@ -2,6 +2,8 @@ import { Inter, Archivo, Cormorant_Garamond } from "next/font/google";
 import localFont from "next/font/local";
 import { getSiteUrl } from "./site-url";
 import { isStagingSite } from "./staging";
+import { getGtmId } from "./gtm.mjs";
+import GoogleTagManager from "./components/GoogleTagManager";
 import "./globals.css";
 
 // Headings: Butler (Light for headlines, Medium available for emphasis)
@@ -89,6 +91,7 @@ export default function RootLayout({ children }) {
           Skip to content
         </a>
         {children}
+        <GoogleTagManager id={getGtmId()} />
       </body>
     </html>
   );

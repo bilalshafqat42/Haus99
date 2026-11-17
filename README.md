@@ -34,6 +34,14 @@ Work goes to `stg` first. Once the manager approves it on staging, `stg` is merg
 | `ENQUIRY_WEBHOOK_URL` / `ENQUIRY_WEBHOOK_TOKEN` | not needed once connected to the panel | same |
 | `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` | for the location map | same |
 | `NEXT_PUBLIC_MAPBOX_STYLE_URL` | Mapbox Studio style, the same as Eden House The Park | same |
+| `NEXT_PUBLIC_GTM_ID` | optional: Google Tag Manager container ID, for example `GTM-XXXXXXX` | the live container's ID |
+
+### Google Tag Manager
+
+Set `NEXT_PUBLIC_GTM_ID` to load a Google Tag Manager container on every page. Left empty (or not a valid `GTM-` ID), the site loads no tracking at all. It is read when the site is built, so after adding or changing it, redeploy on Render (a restart is not enough).
+
+- **Security policy:** with the ID set, the Content-Security-Policy also allows Google Tag Manager and Google Analytics 4. A tag for any other service added inside GTM (for example an advertising pixel) is blocked until its hosts are added in `next.config.mjs`.
+- **Consent:** the site has no cookie banner yet, so GTM loads for every visitor once the ID is set. Check with Legal (UAE PDPL) before setting it on the live site; when a banner is added, load GTM only after the visitor accepts analytics cookies (`app/components/GoogleTagManager.js`).
 
 Render sets `PORT` itself. Never commit secrets: `.env*` files are ignored by git, so set values in Render only.
 

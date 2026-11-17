@@ -1,3 +1,5 @@
+import { getGtmId } from "./app/gtm.mjs";
+
 const isDev = process.env.NODE_ENV !== "production";
 
 /*
@@ -18,14 +20,26 @@ const imageHosts = (process.env.IMAGE_HOSTS ?? "media.refinedubai.com")
  * 'unsafe-inline' for scripts and styles because Next's hydration and
  * mapbox-gl need it without a per-request nonce, and a nonce would end
  * static rendering.
+ *
+ * With NEXT_PUBLIC_GTM_ID set, Google Tag Manager and Google Analytics 4 are
+ * allowed too (Google's published CSP list for GTM and GA4). Tags for other
+ * services added inside GTM need their own hosts added here.
  */
+const gtm = getGtmId()
+  ? {
+      script: " https://www.googletagmanager.com https://*.googletagmanager.com",
+      img: " https://www.googletagmanager.com https://*.google-analytics.com https://*.googletagmanager.com",
+      connect: " https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com",
+    }
+  : { script: "", img: "", connect: "" };
+
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}${gtm.script}`,
   "style-src 'self' 'unsafe-inline'",
-  `img-src 'self' data: blob: https://api.mapbox.com${imageHosts.map((host) => ` https://${host}`).join("")}`,
+  `img-src 'self' data: blob: https://api.mapbox.com${imageHosts.map((host) => ` https://${host}`).join("")}${gtm.img}`,
   "font-src 'self' data:",
-  `connect-src 'self' https://api.mapbox.com https://events.mapbox.com${isDev ? " ws:" : ""}`,
+  `connect-src 'self' https://api.mapbox.com https://events.mapbox.com${gtm.connect}${isDev ? " ws:" : ""}`,
   "worker-src 'self' blob:",
   "child-src 'self' blob:",
   "frame-src 'none'",
