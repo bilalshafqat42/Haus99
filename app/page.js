@@ -93,7 +93,7 @@ export default async function Home() {
       <main id="main" tabIndex={-1}>
         {/* Hero */}
         <section className="frame hero">
-          <Image src={hero.image} alt="HAUS 99 exterior at dusk" fill preload sizes="100vw" className="hero-image" />
+          <Image src={hero.image} alt="HAUS 99 exterior at dusk" fill preload fetchPriority="high" sizes="100vw" className="hero-image" />
           <div className="hero-shade" aria-hidden="true" />
           <div className="container hero-content">
             <h1 className="display hero-title">{hero.title}</h1>
