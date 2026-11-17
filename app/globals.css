@@ -64,7 +64,11 @@ body {
 }
 
 a { color: inherit; text-decoration: none; }
-:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+/* Keyboard focus: brown on the light sections, white on the dark ones, so
+   the ring always stands out (3:1 or more) from what is behind it. */
+:focus-visible { outline: 2px solid var(--brown); outline-offset: 3px; }
+.header :focus-visible, .hero :focus-visible, .stats :focus-visible, .register :focus-visible,
+.render :focus-visible, .skip-link:focus-visible { outline-color: var(--white); }
 
 .skip-link {
   position: fixed; top: 12px; left: 12px; z-index: 100;
@@ -238,6 +242,7 @@ main:focus { outline: none; }
   text-transform: uppercase;
   color: var(--white);
   opacity: 0.92;
+  padding-block: 2px; /* 24px tap target */
 }
 .header-nav a:not(.btn):hover { opacity: 1; color: var(--gold); }
 
@@ -515,7 +520,7 @@ main:focus { outline: none; }
   padding: 22px 0;
   border-bottom: 1px solid var(--line-warm);
 }
-.payment-num { font-size: 12px; color: var(--gold); }
+.payment-num { font-size: 12px; color: var(--brown); }
 .payment-label { font-size: 16px; color: var(--text); }
 .payment-value { font-size: 18px; color: var(--ink); }
 .payment-steps li:last-child .payment-value { font-size: 19px; }
@@ -531,7 +536,7 @@ main:focus { outline: none; }
 .amenity-image img { object-fit: cover; transition: transform 0.6s ease; }
 .amenity:hover .amenity-image img { transform: scale(1.04); }
 .amenity h3 { display: flex; align-items: baseline; gap: 14px; font-size: clamp(26px, 2.6vw, 38px); margin-top: 22px; padding-inline: 24px 0; }
-.amenity h3 span { font-family: var(--sans); font-size: 11px; letter-spacing: 0.1em; color: var(--gold); }
+.amenity h3 span { font-family: var(--sans); font-size: 11px; letter-spacing: 0.1em; color: var(--brown); }
 .amenity p { margin-top: 10px; padding-left: 24px; font-size: 15px; color: var(--text); font-weight: 300; }
 
 /* ------------------------------------------------------------------ */
@@ -736,7 +741,7 @@ button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold
   border-radius: 0;
 }
 .field input::placeholder { color: rgba(255, 255, 255, 0.62); }
-.field input:focus { outline: none; border-bottom-color: var(--gold); }
+.field input:focus { outline: none; border-bottom-color: var(--white); box-shadow: 0 1px 0 var(--white); }
 .field input:user-invalid, .field input[aria-invalid="true"] { border-bottom-color: #f3d3c3; }
 /* Errors: under each field that needs correcting, and a summary above the
    fields (#f3d3c3 on the green is above 4.5:1). */
@@ -788,6 +793,8 @@ button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold
 }
 .footer-blurb { margin-top: 36px; max-width: 290px; font-size: 14px; line-height: 1.6; color: var(--text); }
 .footer ul { display: grid; gap: 18px; font-size: 14px; color: var(--ink); }
+/* Links at least 24px tall to tap, without moving the lines apart */
+.footer ul a { display: inline-block; padding-block: 4px; margin-block: -4px; }
 .footer ul a:hover { color: var(--brown); }
 .footer-partners img { height: auto; }
 .footer-partners {
@@ -839,7 +846,6 @@ button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold
   .carousel-footnote { margin-top: 36px; }
 }
 
-/* Phones: footer links tall enough to tap (24px minimum) */
 @media (max-width: 767px) {
   /* Partner logos in two columns: each label with its logo underneath */
   .footer-partners {
@@ -851,8 +857,9 @@ button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold
     justify-items: start;
     gap: 14px 24px;
   }
+  /* Phones: footer links tall enough to tap (24px minimum) */
   .footer ul { gap: 10px; }
-  .footer ul a { display: inline-block; padding-block: 4px; }
+  .footer ul a { margin-block: 0; }
 }
 
 /* 404 page */
