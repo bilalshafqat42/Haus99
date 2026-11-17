@@ -13,6 +13,7 @@ export default function Header({ nav }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const toggleRef = useRef(null);
+  const headerRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -33,9 +34,28 @@ export default function Header({ nav }) {
     const toggle = toggleRef.current;
     const media = window.matchMedia(MENU_QUERY);
     const onKey = (e) => {
-      if (e.key !== "Escape") return;
-      setOpen(false);
-      toggle?.focus();
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggle?.focus();
+        return;
+      }
+      // Tab and Shift+Tab wrap around inside the open menu (its links, the
+      // wordmark and the close button) instead of leaving for the browser bar
+      if (e.key !== "Tab") return;
+      const items = [...(headerRef.current?.querySelectorAll("a[href], button") ?? [])].filter(
+        (el) => el.getClientRects().length > 0,
+      );
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      const inside = items.includes(document.activeElement);
+      if (e.shiftKey && (document.activeElement === first || !inside)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     const onMedia = () => !media.matches && setOpen(false);
     document.addEventListener("keydown", onKey);
@@ -57,7 +77,7 @@ export default function Header({ nav }) {
   const close = () => setOpen(false);
 
   return (
-    <header className={`header${scrolled ? " is-solid" : ""}${open ? " is-open" : ""}`}>
+    <header ref={headerRef} className={`header${scrolled ? " is-solid" : ""}${open ? " is-open" : ""}`}>
       <div className="header-inner">
         <a href="#main" className="wordmark" aria-label="HAUS 99, back to top" onClick={close}>
           HAUS 99
