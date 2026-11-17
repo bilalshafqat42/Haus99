@@ -737,7 +737,23 @@ button.distance-row[aria-pressed="true"] .distance-icon { background: var(--gold
 }
 .field input::placeholder { color: rgba(255, 255, 255, 0.62); }
 .field input:focus { outline: none; border-bottom-color: var(--gold); }
-.field input:user-invalid { border-bottom-color: #e6b8a2; }
+.field input:user-invalid, .field input[aria-invalid="true"] { border-bottom-color: #f3d3c3; }
+/* Errors: under each field that needs correcting, and a summary above the
+   fields (#f3d3c3 on the green is above 4.5:1). */
+.field { position: relative; }
+.field .field-error {
+  display: block; margin: 8px 0 0;
+  font-size: 13px; letter-spacing: 0; text-transform: none; line-height: 1.4;
+  color: #f3d3c3;
+}
+.form-errors { grid-column: 1 / -1; font-size: 15px; color: #f3d3c3; }
+.form-errors:empty { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+/* Wide screens: the messages hang under the fields so the inputs and the
+   button stay in line, with room made for them above the consent line. */
+@media (min-width: 900px) {
+  .field .field-error { position: absolute; top: 100%; left: 0; right: 0; }
+  .enquiry-form.has-errors .form-consent { margin-top: 24px; }
+}
 .enquiry-form .btn-light { padding-inline: 0; }
 .form-consent, .form-status { grid-column: 1 / -1; font-size: 12px; color: rgba(255, 255, 255, 0.8); }
 /* Empty: out of the layout but still in the accessibility tree, so screen
