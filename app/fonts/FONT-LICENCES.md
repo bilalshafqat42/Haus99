@@ -14,3 +14,8 @@ modified version of Butler must stay under CC BY-SA 4.0.
 
 Not used: Minion Pro (Adobe commercial licence, which does not allow self-hosting the
 font file on a website) and Archivo Expanded (wider than the design).
+
+Inter-18pt-Light.woff2 is subset to Latin, Latin Extended-A, punctuation, currency
+and arrows (117 KB to 41 KB), with every OpenType feature, outline and metric kept,
+as the SIL Open Font License allows. Characters outside that set fall back to the
+next font in the stack.
