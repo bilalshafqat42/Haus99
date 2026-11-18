@@ -100,6 +100,9 @@ const nextConfig = {
   },
   experimental: {
     agentFeedback: true,
+    // One page with a small stylesheet: ship the CSS inside the HTML so the
+    // first paint does not wait for a separate, render-blocking request.
+    inlineCss: true,
   },
   cacheComponents: true,
   partialPrefetching: true,

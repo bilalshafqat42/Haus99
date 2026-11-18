@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import "mapbox-gl/dist/mapbox-gl.css";
 import IllustrativeMap from "./IllustrativeMap";
 import { applyRoadStyle } from "./map-road-style";
 
@@ -176,7 +175,9 @@ export default function LocationExplorer({ location, mapsHref }) {
     const init = async () => {
       let mapboxgl;
       try {
-        ({ default: mapboxgl } = await import("mapbox-gl"));
+        // The map's stylesheet loads with its script, only when the map is
+        // near the screen, so it never blocks the page's first paint.
+        [{ default: mapboxgl }] = await Promise.all([import("mapbox-gl"), import("mapbox-gl/dist/mapbox-gl.css")]);
       } catch {
         return fail();
       }
